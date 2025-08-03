@@ -87,7 +87,7 @@ class IOLAPIClient:
         """
         await self.ensure_token()
         
-        url = f"{self.base_url}/v2{endpoint}"
+        url = f"{self.base_url}{endpoint}"
         headers = self.get_auth_headers()
         
         try:

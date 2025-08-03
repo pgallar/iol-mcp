@@ -48,7 +48,6 @@ class TitulosRoutes(BaseRoutes):
         )
         async def obtener_panel(
             instrumento: str = Field(description="Tipo de instrumento (Acciones, Bonos, Opciones, etc)"),
-            panel: str = Field(description="Tipo de panel (Líderes, General, etc)"),
             pais: str = Field(description="País del panel (argentina, estados_unidos, etc)")
         ) -> Dict[str, Any]:
             """
@@ -56,13 +55,11 @@ class TitulosRoutes(BaseRoutes):
             
             Args:
                 instrumento: Tipo de instrumento (Acciones, Bonos, Opciones, etc)
-                panel: Tipo de panel (Líderes, General, etc)
                 pais: País del panel (argentina, estados_unidos, etc)
             """
             try:
                 result = await self.client.obtener_panel(
                     instrumento=instrumento,
-                    panel=panel,
                     pais=pais
                 )
                 return {

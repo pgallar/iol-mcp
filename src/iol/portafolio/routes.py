@@ -16,13 +16,13 @@ class PortafolioRoutes(BaseRoutes):
             tags=["portafolio", "consulta"]
         )
         async def obtener_portafolio(
-            pais: Optional[str] = None
+            pais: Optional[str] = Field(default=None, description="País del portafolio (argentina, estados_unidos, etc)")
         ) -> Dict[str, Any]:
             """
             Obtiene el portafolio del usuario
             
             Args:
-                pais: Filtrar por país (argentina, estados_unidos, etc)
+                pais: País del portafolio (argentina, estados_unidos, etc)
             """
             try:
                 result = await self.client.obtener_portafolio(pais=pais)
@@ -39,12 +39,12 @@ class PortafolioRoutes(BaseRoutes):
             tags=["portafolio", "operaciones"]
         )
         async def obtener_operaciones(
-            filtro: Optional[str] = None,
-            pais: Optional[str] = None,
-            estado: Optional[str] = None,
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None,
-            numero: Optional[str] = None
+            filtro: Optional[str] = Field(default=None, description="Tipo de operación (Compra, Venta, etc)"),
+            pais: Optional[str] = Field(default=None, description="País de la operación"),
+            estado: Optional[str] = Field(default=None, description="Estado de la operación (pendiente, terminada, etc)"),
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)"),
+            numero: Optional[str] = Field(default=None, description="Número de operación")
         ) -> Dict[str, Any]:
             """
             Obtiene las operaciones del usuario

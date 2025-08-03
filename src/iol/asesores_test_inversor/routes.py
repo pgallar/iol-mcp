@@ -29,7 +29,7 @@ class AsesoresTestInversorRoutes(BaseRoutes):
             tags=["asesores", "test_inversor"]
         )
         async def obtener_test_inversor(
-            id_cliente: int
+            id_cliente: int = Field(description="ID del cliente")
         ) -> Dict[str, Any]:
             """
             Obtiene el test de inversor de un cliente
@@ -68,13 +68,21 @@ class AsesoresTestInversorRoutes(BaseRoutes):
             tags=["asesores", "test_inversor"]
         )
         async def guardar_test_inversor(
-            id_cliente: int,
-            respuestas: List[RespuestaTestInversor] = Field(
+            id_cliente: int = Field(description="ID del cliente"),
+            respuestas: List[Dict[str, Any]] = Field(
                 description="Lista de respuestas del test",
                 example=[
                     {"pregunta_id": 1, "respuesta_id": 2},
                     {"pregunta_id": 2, "respuesta_id": 1}
-                ]
+                ],
+                items={
+                    "type": "object",
+                    "properties": {
+                        "pregunta_id": {"type": "integer", "description": "ID de la pregunta"},
+                        "respuesta_id": {"type": "integer", "description": "ID de la respuesta seleccionada"}
+                    },
+                    "required": ["pregunta_id", "respuesta_id"]
+                }
             )
         ) -> Dict[str, Any]:
             """
@@ -85,11 +93,9 @@ class AsesoresTestInversorRoutes(BaseRoutes):
                 respuestas: Lista de respuestas del test
             """
             try:
-                # Convertir las respuestas al formato esperado por la API
-                respuestas_api = [resp.model_dump() for resp in respuestas]
                 result = await self.client.guardar_test_inversor(
                     id_cliente=id_cliente,
-                    respuestas=respuestas_api
+                    respuestas=respuestas
                 )
                 return {
                     "success": True,

@@ -232,7 +232,7 @@ class MiCuentaRoutes(BaseRoutes):
                 
         @mcp.tool(
             name="solicitar_extraccion",
-            description="Solicitar una extracción de fondos",
+            description="Solicitar extracción de fondos",
             tags=["mi_cuenta", "extraccion"]
         )
         async def solicitar_extraccion(
@@ -259,4 +259,58 @@ class MiCuentaRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error solicitando extracción: {str(e)}"} 
+                return {"error": f"Error solicitando extracción: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_detalle_cuenta",
+            description="Obtener detalle de la cuenta del usuario",
+            tags=["mi_cuenta", "detalle"]
+        )
+        async def obtener_detalle_cuenta() -> Dict[str, Any]:
+            """
+            Obtiene el detalle de la cuenta del usuario
+            """
+            try:
+                result = await self.client.obtener_detalle_cuenta()
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo detalle de cuenta: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_tipos_cuentas",
+            description="Obtener tipos de cuentas disponibles",
+            tags=["mi_cuenta", "tipos"]
+        )
+        async def obtener_tipos_cuentas() -> Dict[str, Any]:
+            """
+            Obtiene los tipos de cuentas disponibles
+            """
+            try:
+                result = await self.client.obtener_tipos_cuentas()
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo tipos de cuentas: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cuentas_bancarias_terceros",
+            description="Obtener cuentas bancarias de terceros",
+            tags=["mi_cuenta", "cuentas"]
+        )
+        async def obtener_cuentas_bancarias_terceros() -> Dict[str, Any]:
+            """
+            Obtiene las cuentas bancarias de terceros
+            """
+            try:
+                result = await self.client.obtener_cuentas_bancarias_terceros()
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo cuentas bancarias de terceros: {str(e)}"} 

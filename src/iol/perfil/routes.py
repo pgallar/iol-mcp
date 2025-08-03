@@ -106,4 +106,63 @@ class PerfilRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo preguntas: {str(e)}"} 
+                return {"error": f"Error obteniendo preguntas del test de inversor: {str(e)}"}
+                
+        @mcp.tool(
+            name="actualizar_perfil",
+            description="Actualizar perfil del usuario",
+            tags=["perfil", "actualizar"]
+        )
+        async def actualizar_perfil(
+            datos_perfil: Dict[str, Any] = Field(
+                description="Datos del perfil a actualizar",
+                example={
+                    "nombre": "Juan",
+                    "apellido": "Perez",
+                    "email": "juan.perez@example.com",
+                    "telefono": "1122334455"
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Actualiza el perfil del usuario
+            
+            Args:
+                datos_perfil: Datos del perfil a actualizar
+            """
+            try:
+                result = await self.client.actualizar_perfil(datos_perfil=datos_perfil)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error actualizando perfil: {str(e)}"}
+                
+        @mcp.tool(
+            name="cambiar_clave",
+            description="Cambiar clave del usuario",
+            tags=["perfil", "clave"]
+        )
+        async def cambiar_clave(
+            clave_actual: str = Field(description="Clave actual"),
+            clave_nueva: str = Field(description="Nueva clave")
+        ) -> Dict[str, Any]:
+            """
+            Cambia la clave del usuario
+            
+            Args:
+                clave_actual: Clave actual
+                clave_nueva: Nueva clave
+            """
+            try:
+                result = await self.client.cambiar_clave(
+                    clave_actual=clave_actual,
+                    clave_nueva=clave_nueva
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error cambiando clave: {str(e)}"} 

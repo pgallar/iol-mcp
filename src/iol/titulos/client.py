@@ -125,4 +125,68 @@ class TitulosClient(IOLAPIClient):
             simbolo: Símbolo del título
             mercado: Mercado del título (bcba, nyse, nasdaq, etc)
         """
-        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Detalle") 
+        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Detalle")
+
+    async def obtener_instrumentos(
+        self,
+        pais: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los instrumentos disponibles para un país
+        
+        Args:
+            pais: País (argentina, estados_unidos, etc)
+        """
+        return await self.get(f"/api/v2/{pais}/Titulos/Cotizacion/Instrumentos")
+        
+    async def obtener_fci(
+        self,
+        simbolo: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Obtiene información de fondos comunes de inversión
+        
+        Args:
+            simbolo: Símbolo del FCI (opcional)
+        """
+        if simbolo:
+            return await self.get(f"/api/v2/Titulos/FCI/{simbolo}")
+        return await self.get("/api/v2/Titulos/FCI")
+        
+    async def obtener_tipos_fondos(self) -> Dict[str, Any]:
+        """
+        Obtiene los tipos de fondos disponibles
+        """
+        return await self.get("/api/v2/Titulos/FCI/TipoFondos")
+        
+    async def obtener_administradoras(self) -> Dict[str, Any]:
+        """
+        Obtiene las administradoras de fondos
+        """
+        return await self.get("/api/v2/Titulos/FCI/Administradoras")
+        
+    async def obtener_tipos_fondos_por_administradora(
+        self,
+        administradora: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los tipos de fondos por administradora
+        
+        Args:
+            administradora: Nombre de la administradora
+        """
+        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos")
+        
+    async def obtener_fondos_por_administradora_y_tipo(
+        self,
+        administradora: str,
+        tipo_fondo: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los fondos por administradora y tipo
+        
+        Args:
+            administradora: Nombre de la administradora
+            tipo_fondo: Tipo de fondo
+        """
+        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos/{tipo_fondo}") 

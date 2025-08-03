@@ -347,4 +347,60 @@ class OperarRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error creando orden de venta por valor nominal: {str(e)}"} 
+                return {"error": f"Error creando orden de venta por valor nominal: {str(e)}"}
+                
+        @mcp.tool(
+            name="suscribir_fci",
+            description="Suscribir un FCI",
+            tags=["operar", "fci"]
+        )
+        async def suscribir_fci(
+            simbolo: str = Field(description="Símbolo del FCI"),
+            monto: float = Field(description="Monto a suscribir")
+        ) -> Dict[str, Any]:
+            """
+            Suscribe un FCI
+            
+            Args:
+                simbolo: Símbolo del FCI
+                monto: Monto a suscribir
+            """
+            try:
+                result = await self.client.suscribir_fci(
+                    simbolo=simbolo,
+                    monto=monto
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error suscribiendo FCI: {str(e)}"}
+                
+        @mcp.tool(
+            name="rescatar_fci",
+            description="Rescatar un FCI",
+            tags=["operar", "fci"]
+        )
+        async def rescatar_fci(
+            simbolo: str = Field(description="Símbolo del FCI"),
+            cantidad: float = Field(description="Cantidad a rescatar")
+        ) -> Dict[str, Any]:
+            """
+            Rescata un FCI
+            
+            Args:
+                simbolo: Símbolo del FCI
+                cantidad: Cantidad a rescatar
+            """
+            try:
+                result = await self.client.rescatar_fci(
+                    simbolo=simbolo,
+                    cantidad=cantidad
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error rescatando FCI: {str(e)}"} 

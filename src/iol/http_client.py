@@ -87,6 +87,10 @@ class IOLAPIClient:
         """
         await self.ensure_token()
         
+        # Asegurarse de que el endpoint comience con /
+        if not endpoint.startswith("/"):
+            endpoint = f"/{endpoint}"
+            
         url = f"{self.base_url}{endpoint}"
         headers = self.get_auth_headers()
         

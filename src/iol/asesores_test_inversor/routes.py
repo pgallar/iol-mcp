@@ -1,15 +1,23 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import AsesoresTestInversorClient
 
-class RespuestaTestInversor(BaseModel):
-    pregunta_id: int = Field(description="ID de la pregunta")
-    respuesta_id: int = Field(description="ID de la respuesta seleccionada")
-
+class RespuestasAsesorTestInversorBindingModel(BaseModel):
+    """Modelo para las respuestas del test de inversor para asesores"""
+    enviarEmailCliente: Optional[bool] = Field(default=None, description="Indica si se debe enviar email al cliente")
+    instrumentosInvertidosAnteriormente: Optional[List[int]] = Field(default=None, description="IDs de instrumentos invertidos anteriormente")
+    nivelesConocimientoInstrumentos: Optional[List[int]] = Field(default=None, description="IDs de niveles de conocimiento de instrumentos")
+    idPlazoElegido: int = Field(description="ID del plazo elegido")
+    idEdadElegida: int = Field(description="ID de la edad elegida")
+    idObjetivoInversionElegida: int = Field(description="ID del objetivo de inversión elegido")
+    idPolizaElegida: int = Field(description="ID de la póliza elegida")
+    idCapacidadAhorroElegida: int = Field(description="ID de la capacidad de ahorro elegida")
+    idPorcentajePatrimonioDedicado: int = Field(description="ID del porcentaje de patrimonio dedicado")
+    
     model_config = ConfigDict(extra="ignore", validate_assignment=True)
-
+    
     @field_validator('*', mode='before')
     @classmethod
     def empty_str_to_none(cls, v):
@@ -24,82 +32,107 @@ class AsesoresTestInversorRoutes(BaseRoutes):
 
     def register_tools(self, mcp: FastMCP):
         @mcp.tool(
-            name="asesores_obtener_test_inversor",  # Prefijo para evitar duplicados
-            description="Obtener test de inversor de un cliente",
+            name="obtener_test_inversor_asesor",
+            description="Obtener preguntas del test de inversor para asesores",
             tags=["asesores", "test_inversor"]
         )
-        async def obtener_test_inversor(
-            id_cliente: int = Field(description="ID del cliente")
-        ) -> Dict[str, Any]:
+        async def obtener_test_inversor() -> Dict[str, Any]:
             """
-            Obtiene el test de inversor de un cliente
+            Obtiene las preguntas del test de inversor para asesores
             
-            Args:
-                id_cliente: ID del cliente
+            Returns:
+                Dict[str, Any]: Objeto con las preguntas del test
             """
             try:
-                result = await self.client.obtener_test_inversor(id_cliente)
+                result = await self.client.obtener_test_inversor()
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo test de inversor: {str(e)}"}
-
+                return {"error": f"Error obteniendo preguntas del test de inversor: {str(e)}"}
+                
         @mcp.tool(
-            name="obtener_preguntas_test",
-            description="Obtener preguntas del test de inversor",
-            tags=["asesores", "test_inversor"]
+            name="calcular_perfil_sin_guardar",
+            description="Calcular perfil del inversor sin guardar los resultados",
+            tags=["asesores", "test_inversor", "perfil"]
         )
-        async def obtener_preguntas() -> Dict[str, Any]:
-            """Obtiene las preguntas del test de inversor"""
-            try:
-                result = await self.client.obtener_preguntas()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo preguntas: {str(e)}"}
-
-        @mcp.tool(
-            name="asesores_guardar_test_inversor",  # Prefijo para evitar duplicados
-            description="Guardar respuestas del test de inversor",
-            tags=["asesores", "test_inversor"]
-        )
-        async def guardar_test_inversor(
-            id_cliente: int = Field(description="ID del cliente"),
-            respuestas: List[Dict[str, Any]] = Field(
-                description="Lista de respuestas del test",
-                example=[
-                    {"pregunta_id": 1, "respuesta_id": 2},
-                    {"pregunta_id": 2, "respuesta_id": 1}
-                ],
-                items={
-                    "type": "object",
-                    "properties": {
-                        "pregunta_id": {"type": "integer", "description": "ID de la pregunta"},
-                        "respuesta_id": {"type": "integer", "description": "ID de la respuesta seleccionada"}
-                    },
-                    "required": ["pregunta_id", "respuesta_id"]
+        async def calcular_perfil_sin_guardar(
+            request: RespuestasAsesorTestInversorBindingModel = Field(
+                description="Datos con las respuestas del test de inversor",
+                example={
+                    "enviarEmailCliente": True,
+                    "instrumentosInvertidosAnteriormente": [1, 2, 3],
+                    "nivelesConocimientoInstrumentos": [1, 2, 3],
+                    "idPlazoElegido": 1,
+                    "idEdadElegida": 2,
+                    "idObjetivoInversionElegida": 3,
+                    "idPolizaElegida": 1,
+                    "idCapacidadAhorroElegida": 2,
+                    "idPorcentajePatrimonioDedicado": 3
                 }
             )
         ) -> Dict[str, Any]:
             """
-            Guarda las respuestas del test de inversor de un cliente
+            Calcula el perfil del inversor sin guardar los resultados
             
             Args:
-                id_cliente: ID del cliente
-                respuestas: Lista de respuestas del test
+                request: Datos con las respuestas del test de inversor
+                
+            Returns:
+                Dict[str, Any]: Objeto con el perfil calculado
             """
             try:
-                result = await self.client.guardar_test_inversor(
-                    id_cliente=id_cliente,
-                    respuestas=respuestas
+                result = await self.client.calcular_perfil_sin_guardar(
+                    respuesta_inversor=request.model_dump(exclude_none=True)
                 )
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error guardando test de inversor: {str(e)}"} 
+                return {"error": f"Error calculando perfil sin guardar: {str(e)}"}
+                
+        @mcp.tool(
+            name="calcular_perfil_asesorado",
+            description="Calcular y guardar perfil del inversor para un cliente asesorado",
+            tags=["asesores", "test_inversor", "perfil"]
+        )
+        async def calcular_perfil(
+            id_cliente_asesorado: int = Field(description="ID del cliente asesorado"),
+            request: RespuestasAsesorTestInversorBindingModel = Field(
+                description="Datos con las respuestas del test de inversor",
+                example={
+                    "enviarEmailCliente": True,
+                    "instrumentosInvertidosAnteriormente": [1, 2, 3],
+                    "nivelesConocimientoInstrumentos": [1, 2, 3],
+                    "idPlazoElegido": 1,
+                    "idEdadElegida": 2,
+                    "idObjetivoInversionElegida": 3,
+                    "idPolizaElegida": 1,
+                    "idCapacidadAhorroElegida": 2,
+                    "idPorcentajePatrimonioDedicado": 3
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Calcula y guarda el perfil del inversor para un cliente asesorado
+            
+            Args:
+                id_cliente_asesorado: ID del cliente asesorado
+                request: Datos con las respuestas del test de inversor
+                
+            Returns:
+                Dict[str, Any]: Objeto con el perfil calculado
+            """
+            try:
+                result = await self.client.calcular_perfil(
+                    id_cliente_asesorado=id_cliente_asesorado,
+                    respuesta_inversor=request.model_dump(exclude_none=True)
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error calculando perfil: {str(e)}"} 

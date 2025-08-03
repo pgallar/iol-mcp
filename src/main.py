@@ -9,13 +9,9 @@ from dotenv import load_dotenv
 # Importar rutas
 from iol.portafolio.routes import PortafolioRoutes
 from iol.titulos.routes import TitulosRoutes
-from iol.asesores.routes import AsesoresRoutes
-from iol.asesores_operar.routes import AsesoresOperarRoutes
-from iol.asesores_test_inversor.routes import AsesoresTestInversorRoutes
 from iol.mi_cuenta.routes import MiCuentaRoutes
 from iol.notificacion.routes import NotificacionRoutes
 from iol.operar.routes import OperarRoutes
-from iol.operatoria_simplificada.routes import OperatoriaSimplificadaRoutes
 from iol.perfil.routes import PerfilRoutes
 
 def setup_logging() -> None:
@@ -65,13 +61,9 @@ def register_routers(mcp: FastMCP) -> None:
     routers = [
         PortafolioRoutes(),
         TitulosRoutes(),
-        AsesoresRoutes(),
-        AsesoresOperarRoutes(),
-        AsesoresTestInversorRoutes(),
         MiCuentaRoutes(),
         NotificacionRoutes(),
         OperarRoutes(),
-        OperatoriaSimplificadaRoutes(),
         PerfilRoutes()
     ]
     

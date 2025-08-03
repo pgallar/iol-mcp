@@ -157,4 +157,22 @@ class MiCuentaClient(IOLAPIClient):
             "idCuentaBancaria": id_cuenta_bancaria,
             "moneda": moneda
         }
-        return await self.post("/api/v2/MiCuenta/SolicitarExtraccion", json=data) 
+        return await self.post("/api/v2/MiCuenta/SolicitarExtraccion", json=data)
+        
+    async def obtener_detalle_cuenta(self) -> Dict[str, Any]:
+        """
+        Obtiene el detalle de la cuenta del usuario
+        """
+        return await self.get("/api/v2/MiCuenta/DetalleCuenta")
+        
+    async def obtener_tipos_cuentas(self) -> Dict[str, Any]:
+        """
+        Obtiene los tipos de cuentas disponibles
+        """
+        return await self.get("/api/v2/MiCuenta/TiposCuentas")
+        
+    async def obtener_cuentas_bancarias_terceros(self) -> Dict[str, Any]:
+        """
+        Obtiene las cuentas bancarias de terceros
+        """
+        return await self.get("/api/v2/MiCuenta/CuentasBancariasTerceros") 

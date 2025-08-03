@@ -246,4 +246,40 @@ class OperarClient(IOLAPIClient):
         }
         if validez:
             data["validez"] = validez
-        return await self.post("/api/v2/Operar/VenderValorNominal", json=data) 
+        return await self.post("/api/v2/Operar/VenderValorNominal", json=data)
+        
+    async def suscribir_fci(
+        self,
+        simbolo: str,
+        monto: float
+    ) -> Dict[str, Any]:
+        """
+        Suscribe un FCI
+        
+        Args:
+            simbolo: Símbolo del FCI
+            monto: Monto a suscribir
+        """
+        data = {
+            "simbolo": simbolo,
+            "monto": monto
+        }
+        return await self.post("/api/v2/Operar/Suscripcion/FCI", json=data)
+        
+    async def rescatar_fci(
+        self,
+        simbolo: str,
+        cantidad: float
+    ) -> Dict[str, Any]:
+        """
+        Rescata un FCI
+        
+        Args:
+            simbolo: Símbolo del FCI
+            cantidad: Cantidad a rescatar
+        """
+        data = {
+            "simbolo": simbolo,
+            "cantidad": cantidad
+        }
+        return await self.post("/api/v2/Operar/Rescate/FCI", json=data) 

@@ -1,8 +1,29 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import AsesoresClient
+
+class MovementBindingModel(BaseModel):
+    """Modelo para la consulta de movimientos históricos según el swagger de IOL"""
+    clientes: Optional[List[int]] = Field(default=None, description="Lista de IDs de clientes asesorados")
+    from_: str = Field(alias="from", description="Fecha desde en formato ISO")
+    to: str = Field(description="Fecha hasta en formato ISO")
+    dateType: str = Field(description="Tipo de fecha para filtrar")
+    status: str = Field(description="Estado de los movimientos")
+    type: Optional[str] = Field(default=None, description="Tipo de movimiento")
+    country: str = Field(description="País de los movimientos")
+    currency: Optional[str] = Field(default=None, description="Moneda de los movimientos")
+    cuentaComitente: Optional[str] = Field(default=None, description="Cuenta comitente")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True, populate_by_name=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
 
 class AsesoresRoutes(BaseRoutes):
     def __init__(self):
@@ -11,100 +32,50 @@ class AsesoresRoutes(BaseRoutes):
 
     def register_tools(self, mcp: FastMCP):
         @mcp.tool(
-            name="obtener_asesores",
-            description="Obtener listado de asesores",
-            tags=["asesores", "consulta"]
+            name="guardar_movimientos_historicos_asesor",
+            description="Consultar o guardar movimientos históricos de clientes asesorados",
+            tags=["asesores", "movimientos", "historicos"]
         )
-        async def obtener_asesores() -> Dict[str, Any]:
-            """Obtiene el listado de asesores disponibles"""
-            try:
-                result = await self.client.obtener_asesores()
-                return {
-                    "success": True,
-                    "result": result
+        async def guardar_movimientos_historicos(
+            request: MovementBindingModel = Field(
+                description="Datos para consultar o guardar los movimientos históricos",
+                example={
+                    "clientes": [12345, 67890],
+                    "from": "2023-01-01T00:00:00",
+                    "to": "2023-12-31T23:59:59",
+                    "dateType": "Operacion",
+                    "status": "Todos",
+                    "type": "Compra",
+                    "country": "argentina",
+                    "currency": "ARS",
+                    "cuentaComitente": "123456"
                 }
-            except Exception as e:
-                return {"error": f"Error obteniendo asesores: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_asesor",
-            description="Obtener información de un asesor específico",
-            tags=["asesores", "consulta"]
-        )
-        async def obtener_asesor(
-            id_asesor: int = Field(description="ID del asesor")
-        ) -> Dict[str, Any]:
-            """Obtiene la información de un asesor específico"""
-            try:
-                result = await self.client.obtener_asesor(id_asesor)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo asesor: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_clientes_asesor",
-            description="Obtener listado de clientes del asesor",
-            tags=["asesores", "clientes"]
-        )
-        async def obtener_clientes_asesor() -> Dict[str, Any]:
-            """Obtiene el listado de clientes del asesor"""
-            try:
-                result = await self.client.obtener_clientes_asesor()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo clientes: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_cliente_asesor",
-            description="Obtener información de un cliente específico",
-            tags=["asesores", "clientes"]
-        )
-        async def obtener_cliente_asesor(
-            id_cliente: int = Field(description="ID del cliente")
-        ) -> Dict[str, Any]:
-            """Obtiene la información de un cliente específico del asesor"""
-            try:
-                result = await self.client.obtener_cliente_asesor(id_cliente)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo cliente: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_operaciones_cliente",
-            description="Obtener operaciones de un cliente",
-            tags=["asesores", "operaciones"]
-        )
-        async def obtener_operaciones_cliente(
-            id_cliente: int = Field(description="ID del cliente"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
+            )
         ) -> Dict[str, Any]:
             """
-            Obtiene las operaciones de un cliente específico
+            Consulta o guarda los movimientos históricos de clientes asesorados
             
             Args:
-                id_cliente: ID del cliente
-                fecha_desde: Fecha desde (YYYY-MM-DD)
-                fecha_hasta: Fecha hasta (YYYY-MM-DD)
+                request: Datos para consultar o guardar los movimientos históricos
             """
             try:
-                result = await self.client.obtener_operaciones_cliente(
-                    id_cliente=id_cliente,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta
+                # Convertir el modelo a diccionario y manejar el campo 'from_'
+                request_dict = request.model_dump(exclude_none=True, by_alias=True)
+                
+                result = await self.client.guardar_movimientos_historicos(
+                    clientes=request.clientes,
+                    fecha_desde=getattr(request, 'from_'),
+                    fecha_hasta=request.to,
+                    tipo_fecha=request.dateType,
+                    estado=request.status,
+                    tipo=request.type,
+                    pais=request.country,
+                    moneda=request.currency,
+                    cuenta_comitente=request.cuentaComitente
                 )
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo operaciones: {str(e)}"} 
+                return {"error": f"Error procesando movimientos históricos: {str(e)}"} 

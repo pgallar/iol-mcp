@@ -74,7 +74,7 @@ class TitulosRoutes(BaseRoutes):
         async def obtener_cotizacion(
             simbolo: str = Field(description="Símbolo del título (Ejemplo: ALUA, APBR)"),
             mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"]),
-            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización", enum=["t0", "t1", "t2", "t3"])
+            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización (t0, t1, t2, t3)")
         ) -> Dict[str, Any]:
             """
             Obtiene la cotización de un título

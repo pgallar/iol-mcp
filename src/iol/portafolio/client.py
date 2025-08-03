@@ -13,7 +13,7 @@ class PortafolioClient(IOLAPIClient):
             pais: Filtrar por país (argentina, estados_unidos, etc)
         """
         params = {"pais": pais} if pais else None
-        return await self.get("/portafolio", params=params)
+        return await self.get("/api/v2/Portafolio", params=params)
 
     async def obtener_operaciones(
         self,
@@ -45,4 +45,4 @@ class PortafolioClient(IOLAPIClient):
         }
         # Eliminar parámetros None
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/operaciones", params=params) 
+        return await self.get("/api/v2/Operaciones", params=params) 

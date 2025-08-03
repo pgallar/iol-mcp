@@ -4,19 +4,19 @@ from ..http_client import IOLAPIClient
 class AsesoresClient(IOLAPIClient):
     async def obtener_asesores(self) -> Dict[str, Any]:
         """Obtiene el listado de asesores disponibles"""
-        return await self.get("/Asesores")
+        return await self.get("/api/v2/Asesores")
 
     async def obtener_asesor(self, id_asesor: int) -> Dict[str, Any]:
         """Obtiene la información de un asesor específico"""
-        return await self.get(f"/Asesores/{id_asesor}")
+        return await self.get(f"/api/v2/Asesores/{id_asesor}")
 
     async def obtener_clientes_asesor(self) -> Dict[str, Any]:
         """Obtiene el listado de clientes del asesor"""
-        return await self.get("/Asesores/Clientes")
+        return await self.get("/api/v2/Asesores/Clientes")
 
     async def obtener_cliente_asesor(self, id_cliente: int) -> Dict[str, Any]:
         """Obtiene la información de un cliente específico del asesor"""
-        return await self.get(f"/Asesores/Clientes/{id_cliente}")
+        return await self.get(f"/api/v2/Asesores/Clientes/{id_cliente}")
 
     async def obtener_operaciones_cliente(
         self,
@@ -30,4 +30,4 @@ class AsesoresClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get(f"/Asesores/Clientes/{id_cliente}/Operaciones", params=params) 
+        return await self.get(f"/api/v2/Asesores/Clientes/{id_cliente}/Operaciones", params=params) 

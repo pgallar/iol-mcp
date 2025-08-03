@@ -4,11 +4,11 @@ from ..http_client import IOLAPIClient
 class MiCuentaClient(IOLAPIClient):
     async def obtener_estado_cuenta(self) -> Dict[str, Any]:
         """Obtiene el estado de cuenta del usuario"""
-        return await self.get("/MiCuenta/EstadoCuenta")
+        return await self.get("/api/v2/MiCuenta/EstadoCuenta")
 
     async def obtener_saldos(self) -> Dict[str, Any]:
         """Obtiene los saldos de la cuenta"""
-        return await self.get("/MiCuenta/Saldos")
+        return await self.get("/api/v2/MiCuenta/Saldos")
 
     async def obtener_movimientos(
         self,
@@ -21,7 +21,7 @@ class MiCuentaClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/MiCuenta/Movimientos", params=params)
+        return await self.get("/api/v2/MiCuenta/Movimientos", params=params)
 
     async def obtener_movimientos_fondos(
         self,
@@ -34,7 +34,7 @@ class MiCuentaClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/MiCuenta/MovimientosFondos", params=params)
+        return await self.get("/api/v2/MiCuenta/MovimientosFondos", params=params)
 
     async def obtener_movimientos_fci(
         self,
@@ -47,4 +47,4 @@ class MiCuentaClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/MiCuenta/MovimientosFCI", params=params) 
+        return await self.get("/api/v2/MiCuenta/MovimientosFCI", params=params) 

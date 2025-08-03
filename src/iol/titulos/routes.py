@@ -47,7 +47,7 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "panel"]
         )
         async def obtener_panel(
-            instrumento: str = Field(description="Tipo de instrumento (Acciones, Bonos, etc)"),
+            instrumento: str = Field(description="Tipo de instrumento (Acciones, Bonos, Opciones, etc)"),
             panel: str = Field(description="Tipo de panel (Líderes, General, etc)"),
             pais: str = Field(description="País del panel (argentina, estados_unidos, etc)")
         ) -> Dict[str, Any]:
@@ -55,7 +55,7 @@ class TitulosRoutes(BaseRoutes):
             Obtiene el panel de un instrumento
             
             Args:
-                instrumento: Tipo de instrumento (Acciones, Bonos, etc)
+                instrumento: Tipo de instrumento (Acciones, Bonos, Opciones, etc)
                 panel: Tipo de panel (Líderes, General, etc)
                 pais: País del panel (argentina, estados_unidos, etc)
             """

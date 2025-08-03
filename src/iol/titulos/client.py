@@ -16,7 +16,7 @@ class TitulosClient(IOLAPIClient):
             mercado: Mercado del título (bcba, nyse, nasdaq, etc)
             plazo: Plazo de la cotización (t0, t1, t2)
         """
-        endpoint = f"/Titulos/{mercado}/{simbolo}/cotizacion"
+        endpoint = f"/api/v2/Titulos/{mercado}/{simbolo}/cotizacion"
         if plazo:
             endpoint += f"/{plazo}"
         return await self.get(endpoint)
@@ -31,11 +31,11 @@ class TitulosClient(IOLAPIClient):
         Obtiene el panel de un instrumento
         
         Args:
-            instrumento: Tipo de instrumento (Acciones, Bonos, etc)
+            instrumento: Tipo de instrumento (Acciones, Bonos, Opciones, etc)
             panel: Tipo de panel (Líderes, General, etc)
             pais: País del panel (argentina, estados_unidos, etc)
         """
-        return await self.get(f"/Titulos/{instrumento}/{panel}/{pais}")
+        return await self.get(f"/api/v2/Titulos/Cotizacion/panel/{instrumento}/{panel}/{pais}")
 
     async def obtener_opciones(
         self,
@@ -49,7 +49,7 @@ class TitulosClient(IOLAPIClient):
             simbolo: Símbolo del título
             mercado: Mercado del título (bcba, nyse, nasdaq, etc)
         """
-        return await self.get(f"/Titulos/Opciones/{mercado}/{simbolo}")
+        return await self.get(f"/api/v2/Titulos/Opciones/{mercado}/{simbolo}")
 
     async def obtener_puntas(
         self,
@@ -65,7 +65,7 @@ class TitulosClient(IOLAPIClient):
             mercado: Mercado del título (bcba, nyse, nasdaq, etc)
             plazo: Plazo de la cotización (t0, t1, t2)
         """
-        endpoint = f"/Titulos/{mercado}/{simbolo}/Puntas"
+        endpoint = f"/api/v2/Titulos/{mercado}/{simbolo}/Puntas"
         if plazo:
             endpoint += f"/{plazo}"
         return await self.get(endpoint) 

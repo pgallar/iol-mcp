@@ -19,7 +19,7 @@ class NotificacionClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/Notificacion", params=params)
+        return await self.get("/api/v2/Notificacion", params=params)
 
     async def marcar_notificacion_leida(
         self,
@@ -31,4 +31,4 @@ class NotificacionClient(IOLAPIClient):
         Args:
             id_notificacion: ID de la notificación
         """
-        return await self.put(f"/Notificacion/{id_notificacion}", json={}) 
+        return await self.post(f"/api/v2/Notificacion/{id_notificacion}/Leida", json={}) 

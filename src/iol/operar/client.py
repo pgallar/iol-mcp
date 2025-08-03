@@ -19,7 +19,7 @@ class OperarClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/Operar/OrdenesPendientes", params=params)
+        return await self.get("/api/v2/Operar/OrdenesPendientes", params=params)
 
     async def obtener_ordenes_finalizadas(
         self,
@@ -38,7 +38,7 @@ class OperarClient(IOLAPIClient):
             "fechaHasta": fecha_hasta
         }
         params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/Operar/OrdenesFinalizadas", params=params)
+        return await self.get("/api/v2/Operar/OrdenesFinalizadas", params=params)
 
     async def comprar(
         self,
@@ -68,7 +68,7 @@ class OperarClient(IOLAPIClient):
             "mercado": mercado,
             "plazo": plazo
         }
-        return await self.post("/Operar/Comprar", json=data)
+        return await self.post("/api/v2/Operar/Comprar", json=data)
 
     async def vender(
         self,
@@ -98,7 +98,7 @@ class OperarClient(IOLAPIClient):
             "mercado": mercado,
             "plazo": plazo
         }
-        return await self.post("/Operar/Vender", json=data)
+        return await self.post("/api/v2/Operar/Vender", json=data)
 
     async def cancelar_orden(
         self,
@@ -110,7 +110,7 @@ class OperarClient(IOLAPIClient):
         Args:
             numero: Número de orden
         """
-        return await self.delete(f"/Operar/CancelarOrden/{numero}")
+        return await self.delete(f"/api/v2/Operar/CancelarOrden/{numero}")
 
     async def obtener_estado_orden(
         self,
@@ -122,4 +122,4 @@ class OperarClient(IOLAPIClient):
         Args:
             numero: Número de orden
         """
-        return await self.get(f"/Operar/EstadoOrden/{numero}") 
+        return await self.get(f"/api/v2/Operar/EstadoOrden/{numero}") 

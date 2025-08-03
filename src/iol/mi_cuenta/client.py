@@ -1,178 +1,92 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from ..http_client import IOLAPIClient
 
 class MiCuentaClient(IOLAPIClient):
     async def obtener_estado_cuenta(self) -> Dict[str, Any]:
         """
         Obtiene el estado de cuenta del usuario
+        
+        Returns:
+            Dict[str, Any]: Objeto EstadoCuentaModel con información de cuentas, estadísticas y total en pesos
         """
-        return await self.get("/api/v2/MiCuenta/EstadoCuenta")
-
-    async def obtener_saldos(self) -> Dict[str, Any]:
-        """
-        Obtiene los saldos del usuario
-        """
-        return await self.get("/api/v2/MiCuenta/Saldos")
-
-    async def obtener_movimientos(
+        return await self.get("/api/v2/estadocuenta")
+        
+    async def obtener_portafolio(
         self,
-        pais: Optional[str] = None,
-        tipo_movimiento: Optional[str] = None,
-        fecha_desde: Optional[str] = None,
-        fecha_hasta: Optional[str] = None
+        pais: str
     ) -> Dict[str, Any]:
         """
-        Obtiene los movimientos de cuenta del usuario
+        Obtiene el portafolio del usuario para un país específico
         
         Args:
-            pais: País de los movimientos (argentina, estados_unidos, etc)
-            tipo_movimiento: Tipo de movimiento (deposito, extraccion, etc)
-            fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-            fecha_hasta: Fecha de fin en formato YYYY-MM-DD
+            pais: País del portafolio (argentina, estados_unidos)
+            
+        Returns:
+            Dict[str, Any]: Objeto PortafolioModel con la información del portafolio
         """
-        endpoint = "/api/v2/MiCuenta/Movimientos"
-        params = {}
-        if pais:
-            params["pais"] = pais
-        if tipo_movimiento:
-            params["tipoMovimiento"] = tipo_movimiento
-        if fecha_desde:
-            params["fechaDesde"] = fecha_desde
-        if fecha_hasta:
-            params["fechaHasta"] = fecha_hasta
-        return await self.get(endpoint, params=params)
-
-    async def obtener_movimientos_fondos(
+        return await self.get(f"/api/v2/portafolio/{pais}")
+        
+    async def obtener_operacion(
         self,
-        pais: Optional[str] = None,
-        tipo_movimiento: Optional[str] = None,
-        fecha_desde: Optional[str] = None,
-        fecha_hasta: Optional[str] = None
+        numero: int
     ) -> Dict[str, Any]:
         """
-        Obtiene los movimientos de fondos del usuario
+        Obtiene el detalle de una operación específica
         
         Args:
-            pais: País de los movimientos (argentina, estados_unidos, etc)
-            tipo_movimiento: Tipo de movimiento (deposito, extraccion, etc)
-            fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-            fecha_hasta: Fecha de fin en formato YYYY-MM-DD
+            numero: Número de la operación
+            
+        Returns:
+            Dict[str, Any]: Objeto OperacionDetalleModel con el detalle de la operación
         """
-        endpoint = "/api/v2/MiCuenta/Movimientos/Fondos"
-        params = {}
-        if pais:
-            params["pais"] = pais
-        if tipo_movimiento:
-            params["tipoMovimiento"] = tipo_movimiento
-        if fecha_desde:
-            params["fechaDesde"] = fecha_desde
-        if fecha_hasta:
-            params["fechaHasta"] = fecha_hasta
-        return await self.get(endpoint, params=params)
-
-    async def obtener_movimientos_fci(
+        return await self.get(f"/api/v2/operaciones/{numero}")
+        
+    async def cancelar_operacion(
         self,
-        pais: Optional[str] = None,
-        tipo_movimiento: Optional[str] = None,
-        fecha_desde: Optional[str] = None,
-        fecha_hasta: Optional[str] = None
+        numero: int
     ) -> Dict[str, Any]:
         """
-        Obtiene los movimientos de FCI del usuario
+        Cancela una operación específica
         
         Args:
-            pais: País de los movimientos (argentina, estados_unidos, etc)
-            tipo_movimiento: Tipo de movimiento (suscripcion, rescate, etc)
-            fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-            fecha_hasta: Fecha de fin en formato YYYY-MM-DD
+            numero: Número de la operación a cancelar
+            
+        Returns:
+            Dict[str, Any]: Objeto ResponseModel con el resultado de la cancelación
         """
-        endpoint = "/api/v2/MiCuenta/Movimientos/FCI"
-        params = {}
-        if pais:
-            params["pais"] = pais
-        if tipo_movimiento:
-            params["tipoMovimiento"] = tipo_movimiento
-        if fecha_desde:
-            params["fechaDesde"] = fecha_desde
-        if fecha_hasta:
-            params["fechaHasta"] = fecha_hasta
-        return await self.get(endpoint, params=params)
+        return await self.delete(f"/api/v2/operaciones/{numero}")
         
-    async def obtener_cuentas_bancarias(self) -> Dict[str, Any]:
-        """
-        Obtiene las cuentas bancarias del usuario
-        """
-        return await self.get("/api/v2/MiCuenta/CuentasBancarias")
-        
-    async def obtener_cuentas_comitentes(self) -> Dict[str, Any]:
-        """
-        Obtiene las cuentas comitentes del usuario
-        """
-        return await self.get("/api/v2/MiCuenta/CuentasComitentes")
-        
-    async def obtener_resumen_cuenta(
+    async def obtener_operaciones(
         self,
+        numero: Optional[int] = None,
+        estado: Optional[str] = None,
+        fecha_desde: Optional[str] = None,
+        fecha_hasta: Optional[str] = None,
         pais: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
-        Obtiene el resumen de cuenta del usuario
+        Obtiene las operaciones del usuario según los filtros especificados
         
         Args:
-            pais: País del resumen (argentina, estados_unidos, etc)
+            numero: Número de operación para filtrar
+            estado: Estado de las operaciones (todas, pendientes, terminadas, canceladas)
+            fecha_desde: Fecha desde en formato ISO
+            fecha_hasta: Fecha hasta en formato ISO
+            pais: País de las operaciones (argentina, estados_unidos)
+            
+        Returns:
+            List[Dict[str, Any]]: Lista de objetos OperacionModel con las operaciones
         """
-        endpoint = "/api/v2/MiCuenta/ResumenCuenta"
         params = {}
+        if numero is not None:
+            params["filtro.numero"] = numero
+        if estado:
+            params["filtro.estado"] = estado
+        if fecha_desde:
+            params["filtro.fechaDesde"] = fecha_desde
+        if fecha_hasta:
+            params["filtro.fechaHasta"] = fecha_hasta
         if pais:
-            params["pais"] = pais
-        return await self.get(endpoint, params=params)
-        
-    async def obtener_detalle_movimiento(
-        self,
-        id_movimiento: int
-    ) -> Dict[str, Any]:
-        """
-        Obtiene el detalle de un movimiento específico
-        
-        Args:
-            id_movimiento: ID del movimiento
-        """
-        return await self.get(f"/api/v2/MiCuenta/Movimientos/{id_movimiento}")
-        
-    async def solicitar_extraccion(
-        self,
-        monto: float,
-        id_cuenta_bancaria: int,
-        moneda: str
-    ) -> Dict[str, Any]:
-        """
-        Solicita una extracción de fondos
-        
-        Args:
-            monto: Monto a extraer
-            id_cuenta_bancaria: ID de la cuenta bancaria destino
-            moneda: Moneda de la extracción (ARS, USD, etc)
-        """
-        data = {
-            "monto": monto,
-            "idCuentaBancaria": id_cuenta_bancaria,
-            "moneda": moneda
-        }
-        return await self.post("/api/v2/MiCuenta/SolicitarExtraccion", json=data)
-        
-    async def obtener_detalle_cuenta(self) -> Dict[str, Any]:
-        """
-        Obtiene el detalle de la cuenta del usuario
-        """
-        return await self.get("/api/v2/MiCuenta/DetalleCuenta")
-        
-    async def obtener_tipos_cuentas(self) -> Dict[str, Any]:
-        """
-        Obtiene los tipos de cuentas disponibles
-        """
-        return await self.get("/api/v2/MiCuenta/TiposCuentas")
-        
-    async def obtener_cuentas_bancarias_terceros(self) -> Dict[str, Any]:
-        """
-        Obtiene las cuentas bancarias de terceros
-        """
-        return await self.get("/api/v2/MiCuenta/CuentasBancariasTerceros") 
+            params["filtro.pais"] = pais
+            
+        return await self.get("/api/v2/operaciones", params=params) 

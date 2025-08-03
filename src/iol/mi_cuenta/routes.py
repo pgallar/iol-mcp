@@ -1,8 +1,65 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import MiCuentaClient
+
+class CuentaModel(BaseModel):
+    """Modelo para representar una cuenta según el esquema EstadoCuentaModel"""
+    # Aquí se definirían los campos específicos de CuentaModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+
+class EstadisticaModel(BaseModel):
+    """Modelo para representar una estadística según el esquema EstadoCuentaModel"""
+    # Aquí se definirían los campos específicos de EstadisticaModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+
+class EstadoCuentaModel(BaseModel):
+    """Modelo para representar el estado de cuenta según el swagger"""
+    cuentas: Optional[List[CuentaModel]] = Field(default=None, description="Lista de cuentas del usuario")
+    estadisticas: Optional[List[EstadisticaModel]] = Field(default=None, description="Lista de estadísticas de la cuenta")
+    totalEnPesos: Optional[float] = Field(default=None, description="Total en pesos")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class PortafolioModel(BaseModel):
+    """Modelo para representar el portafolio según el swagger"""
+    # Aquí se definirían los campos específicos de PortafolioModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+
+class OperacionDetalleModel(BaseModel):
+    """Modelo para representar el detalle de una operación según el swagger"""
+    # Aquí se definirían los campos específicos de OperacionDetalleModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+
+class ResponseModel(BaseModel):
+    """Modelo para representar la respuesta de cancelación según el swagger"""
+    # Aquí se definirían los campos específicos de ResponseModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+
+class OperacionModel(BaseModel):
+    """Modelo para representar una operación según el swagger"""
+    # Aquí se definirían los campos específicos de OperacionModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
 class MiCuentaRoutes(BaseRoutes):
     def __init__(self):
@@ -18,6 +75,9 @@ class MiCuentaRoutes(BaseRoutes):
         async def obtener_estado_cuenta() -> Dict[str, Any]:
             """
             Obtiene el estado de cuenta del usuario
+            
+            Returns:
+                Dict[str, Any]: Objeto con información de cuentas, estadísticas y total en pesos
             """
             try:
                 result = await self.client.obtener_estado_cuenta()
@@ -27,290 +87,121 @@ class MiCuentaRoutes(BaseRoutes):
                 }
             except Exception as e:
                 return {"error": f"Error obteniendo estado de cuenta: {str(e)}"}
-
+                
         @mcp.tool(
-            name="obtener_saldos",
-            description="Obtener saldos del usuario",
-            tags=["mi_cuenta", "saldos"]
+            name="obtener_portafolio",
+            description="Obtener portafolio del usuario para un país específico",
+            tags=["mi_cuenta", "portafolio"]
         )
-        async def obtener_saldos() -> Dict[str, Any]:
+        async def obtener_portafolio(
+            pais: str = Field(description="País del portafolio", enum=["argentina", "estados_unidos"])
+        ) -> Dict[str, Any]:
             """
-            Obtiene los saldos del usuario
+            Obtiene el portafolio del usuario para un país específico
+            
+            Args:
+                pais: País del portafolio (argentina, estados_unidos)
+                
+            Returns:
+                Dict[str, Any]: Objeto con la información del portafolio
             """
             try:
-                result = await self.client.obtener_saldos()
+                result = await self.client.obtener_portafolio(pais=pais)
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo saldos: {str(e)}"}
-
+                return {"error": f"Error obteniendo portafolio: {str(e)}"}
+                
         @mcp.tool(
-            name="obtener_movimientos",
-            description="Obtener movimientos de cuenta del usuario",
-            tags=["mi_cuenta", "movimientos"]
+            name="obtener_operacion",
+            description="Obtener detalle de una operación específica",
+            tags=["mi_cuenta", "operaciones"]
         )
-        async def obtener_movimientos(
-            pais: Optional[str] = Field(default=None, description="País de los movimientos (argentina, estados_unidos, etc)"),
-            tipo_movimiento: Optional[str] = Field(default=None, description="Tipo de movimiento (deposito, extraccion, etc)"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha de inicio en formato YYYY-MM-DD"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha de fin en formato YYYY-MM-DD")
+        async def obtener_operacion(
+            numero: int = Field(description="Número de la operación")
         ) -> Dict[str, Any]:
             """
-            Obtiene los movimientos de cuenta del usuario
+            Obtiene el detalle de una operación específica
             
             Args:
-                pais: País de los movimientos (argentina, estados_unidos, etc)
-                tipo_movimiento: Tipo de movimiento (deposito, extraccion, etc)
-                fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-                fecha_hasta: Fecha de fin en formato YYYY-MM-DD
+                numero: Número de la operación
+                
+            Returns:
+                Dict[str, Any]: Objeto con el detalle de la operación
             """
             try:
-                result = await self.client.obtener_movimientos(
-                    pais=pais,
-                    tipo_movimiento=tipo_movimiento,
+                result = await self.client.obtener_operacion(numero=numero)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo operación: {str(e)}"}
+                
+        @mcp.tool(
+            name="cancelar_operacion",
+            description="Cancelar una operación específica",
+            tags=["mi_cuenta", "operaciones", "cancelar"]
+        )
+        async def cancelar_operacion(
+            numero: int = Field(description="Número de la operación a cancelar")
+        ) -> Dict[str, Any]:
+            """
+            Cancela una operación específica
+            
+            Args:
+                numero: Número de la operación a cancelar
+                
+            Returns:
+                Dict[str, Any]: Objeto con el resultado de la cancelación
+            """
+            try:
+                result = await self.client.cancelar_operacion(numero=numero)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error cancelando operación: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_operaciones",
+            description="Obtener operaciones del usuario según filtros",
+            tags=["mi_cuenta", "operaciones", "filtros"]
+        )
+        async def obtener_operaciones(
+            numero: Optional[int] = Field(default=None, description="Número de operación para filtrar"),
+            estado: Optional[str] = Field(default=None, description="Estado de las operaciones", enum=["todas", "pendientes", "terminadas", "canceladas"]),
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde en formato ISO (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta en formato ISO (YYYY-MM-DD)"),
+            pais: Optional[str] = Field(default=None, description="País de las operaciones", enum=["argentina", "estados_unidos"])
+        ) -> Dict[str, Any]:
+            """
+            Obtiene las operaciones del usuario según los filtros especificados
+            
+            Args:
+                numero: Número de operación para filtrar
+                estado: Estado de las operaciones (todas, pendientes, terminadas, canceladas)
+                fecha_desde: Fecha desde en formato ISO
+                fecha_hasta: Fecha hasta en formato ISO
+                pais: País de las operaciones (argentina, estados_unidos)
+                
+            Returns:
+                Dict[str, Any]: Lista de objetos con las operaciones
+            """
+            try:
+                result = await self.client.obtener_operaciones(
+                    numero=numero,
+                    estado=estado,
                     fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta
+                    fecha_hasta=fecha_hasta,
+                    pais=pais
                 )
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo movimientos: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_movimientos_fondos",
-            description="Obtener movimientos de fondos del usuario",
-            tags=["mi_cuenta", "movimientos", "fondos"]
-        )
-        async def obtener_movimientos_fondos(
-            pais: Optional[str] = Field(default=None, description="País de los movimientos (argentina, estados_unidos, etc)"),
-            tipo_movimiento: Optional[str] = Field(default=None, description="Tipo de movimiento (deposito, extraccion, etc)"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha de inicio en formato YYYY-MM-DD"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha de fin en formato YYYY-MM-DD")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los movimientos de fondos del usuario
-            
-            Args:
-                pais: País de los movimientos (argentina, estados_unidos, etc)
-                tipo_movimiento: Tipo de movimiento (deposito, extraccion, etc)
-                fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-                fecha_hasta: Fecha de fin en formato YYYY-MM-DD
-            """
-            try:
-                result = await self.client.obtener_movimientos_fondos(
-                    pais=pais,
-                    tipo_movimiento=tipo_movimiento,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo movimientos de fondos: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_movimientos_fci",
-            description="Obtener movimientos de FCI del usuario",
-            tags=["mi_cuenta", "movimientos", "fci"]
-        )
-        async def obtener_movimientos_fci(
-            pais: Optional[str] = Field(default=None, description="País de los movimientos (argentina, estados_unidos, etc)"),
-            tipo_movimiento: Optional[str] = Field(default=None, description="Tipo de movimiento (suscripcion, rescate, etc)"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha de inicio en formato YYYY-MM-DD"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha de fin en formato YYYY-MM-DD")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los movimientos de FCI del usuario
-            
-            Args:
-                pais: País de los movimientos (argentina, estados_unidos, etc)
-                tipo_movimiento: Tipo de movimiento (suscripcion, rescate, etc)
-                fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-                fecha_hasta: Fecha de fin en formato YYYY-MM-DD
-            """
-            try:
-                result = await self.client.obtener_movimientos_fci(
-                    pais=pais,
-                    tipo_movimiento=tipo_movimiento,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo movimientos de FCI: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_cuentas_bancarias",
-            description="Obtener cuentas bancarias del usuario",
-            tags=["mi_cuenta", "cuentas"]
-        )
-        async def obtener_cuentas_bancarias() -> Dict[str, Any]:
-            """
-            Obtiene las cuentas bancarias del usuario
-            """
-            try:
-                result = await self.client.obtener_cuentas_bancarias()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo cuentas bancarias: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_cuentas_comitentes",
-            description="Obtener cuentas comitentes del usuario",
-            tags=["mi_cuenta", "cuentas"]
-        )
-        async def obtener_cuentas_comitentes() -> Dict[str, Any]:
-            """
-            Obtiene las cuentas comitentes del usuario
-            """
-            try:
-                result = await self.client.obtener_cuentas_comitentes()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo cuentas comitentes: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_resumen_cuenta",
-            description="Obtener resumen de cuenta del usuario",
-            tags=["mi_cuenta", "resumen"]
-        )
-        async def obtener_resumen_cuenta(
-            pais: Optional[str] = Field(default=None, description="País del resumen (argentina, estados_unidos, etc)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene el resumen de cuenta del usuario
-            
-            Args:
-                pais: País del resumen (argentina, estados_unidos, etc)
-            """
-            try:
-                result = await self.client.obtener_resumen_cuenta(pais=pais)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo resumen de cuenta: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_detalle_movimiento",
-            description="Obtener detalle de un movimiento específico",
-            tags=["mi_cuenta", "movimientos", "detalle"]
-        )
-        async def obtener_detalle_movimiento(
-            id_movimiento: int = Field(description="ID del movimiento")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene el detalle de un movimiento específico
-            
-            Args:
-                id_movimiento: ID del movimiento
-            """
-            try:
-                result = await self.client.obtener_detalle_movimiento(id_movimiento=id_movimiento)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo detalle del movimiento: {str(e)}"}
-                
-        @mcp.tool(
-            name="solicitar_extraccion",
-            description="Solicitar extracción de fondos",
-            tags=["mi_cuenta", "extraccion"]
-        )
-        async def solicitar_extraccion(
-            monto: float = Field(description="Monto a extraer"),
-            id_cuenta_bancaria: int = Field(description="ID de la cuenta bancaria destino"),
-            moneda: str = Field(description="Moneda de la extracción (ARS, USD, etc)")
-        ) -> Dict[str, Any]:
-            """
-            Solicita una extracción de fondos
-            
-            Args:
-                monto: Monto a extraer
-                id_cuenta_bancaria: ID de la cuenta bancaria destino
-                moneda: Moneda de la extracción (ARS, USD, etc)
-            """
-            try:
-                result = await self.client.solicitar_extraccion(
-                    monto=monto,
-                    id_cuenta_bancaria=id_cuenta_bancaria,
-                    moneda=moneda
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error solicitando extracción: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_detalle_cuenta",
-            description="Obtener detalle de la cuenta del usuario",
-            tags=["mi_cuenta", "detalle"]
-        )
-        async def obtener_detalle_cuenta() -> Dict[str, Any]:
-            """
-            Obtiene el detalle de la cuenta del usuario
-            """
-            try:
-                result = await self.client.obtener_detalle_cuenta()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo detalle de cuenta: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_tipos_cuentas",
-            description="Obtener tipos de cuentas disponibles",
-            tags=["mi_cuenta", "tipos"]
-        )
-        async def obtener_tipos_cuentas() -> Dict[str, Any]:
-            """
-            Obtiene los tipos de cuentas disponibles
-            """
-            try:
-                result = await self.client.obtener_tipos_cuentas()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo tipos de cuentas: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_cuentas_bancarias_terceros",
-            description="Obtener cuentas bancarias de terceros",
-            tags=["mi_cuenta", "cuentas"]
-        )
-        async def obtener_cuentas_bancarias_terceros() -> Dict[str, Any]:
-            """
-            Obtiene las cuentas bancarias de terceros
-            """
-            try:
-                result = await self.client.obtener_cuentas_bancarias_terceros()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo cuentas bancarias de terceros: {str(e)}"} 
+                return {"error": f"Error obteniendo operaciones: {str(e)}"} 

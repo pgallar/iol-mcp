@@ -12,14 +12,24 @@ class TitulosClient(IOLAPIClient):
         Obtiene la cotización de un título
         
         Args:
-            simbolo: Símbolo del título
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            plazo: Plazo de la cotización (t0, t1, t2)
+            simbolo: Símbolo del título (Ejemplo: ALUA, APBR)
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+            plazo: Plazo de la cotización (t0, t1, t2, t3)
+            
+        Returns:
+            Dict[str, Any]: Objeto CotizacionModel con la información de la cotización
         """
-        endpoint = f"/api/v2/{mercado}/Titulos/{simbolo}/Cotizacion"
+        params = {
+            "model.simbolo": simbolo,
+            "model.mercado": mercado,
+            "simbolo": simbolo,
+            "mercado": mercado
+        }
+        
         if plazo:
-            endpoint += f"/{plazo}"
-        return await self.get(endpoint)
+            params["model.plazo"] = plazo
+            
+        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Cotizacion", params=params)
 
     async def obtener_panel(
         self,
@@ -49,83 +59,6 @@ class TitulosClient(IOLAPIClient):
             mercado: Mercado del título (bcba, nyse, nasdaq, etc)
         """
         return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Opciones")
-
-    async def obtener_puntas(
-        self,
-        simbolo: str,
-        mercado: str,
-        plazo: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Obtiene las puntas de un título
-        
-        Args:
-            simbolo: Símbolo del título
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            plazo: Plazo de la cotización (t0, t1, t2)
-        """
-        endpoint = f"/api/v2/{mercado}/Titulos/{simbolo}/Puntas"
-        if plazo:
-            endpoint += f"/{plazo}"
-        return await self.get(endpoint)
-        
-    async def obtener_datos_historicos(
-        self,
-        simbolo: str,
-        mercado: str,
-        desde: str,
-        hasta: str,
-        ajustado: bool = True
-    ) -> Dict[str, Any]:
-        """
-        Obtiene los datos históricos de un título
-        
-        Args:
-            simbolo: Símbolo del título
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            desde: Fecha de inicio en formato YYYY-MM-DD
-            hasta: Fecha de fin en formato YYYY-MM-DD
-            ajustado: Indica si los datos deben estar ajustados por dividendos
-        """
-        endpoint = f"/api/v2/{mercado}/Titulos/{simbolo}/Cotizacion/Historico"
-        params = {
-            "fechaDesde": desde,
-            "fechaHasta": hasta,
-            "ajustado": str(ajustado).lower()
-        }
-        return await self.get(endpoint, params=params)
-        
-    async def buscar_titulos(
-        self,
-        filtro: str,
-        mercado: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Busca títulos por nombre o símbolo
-        
-        Args:
-            filtro: Texto a buscar
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-        """
-        endpoint = f"/api/v2/Titulos/Buscar"
-        params = {"filtro": filtro}
-        if mercado:
-            params["mercado"] = mercado
-        return await self.get(endpoint, params=params)
-        
-    async def obtener_detalle_titulo(
-        self,
-        simbolo: str,
-        mercado: str
-    ) -> Dict[str, Any]:
-        """
-        Obtiene información detallada de un título
-        
-        Args:
-            simbolo: Símbolo del título
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-        """
-        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Detalle")
 
     async def obtener_instrumentos(
         self,
@@ -173,7 +106,7 @@ class TitulosClient(IOLAPIClient):
         Obtiene los tipos de fondos por administradora
         
         Args:
-            administradora: Nombre de la administradora
+            administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
         """
         return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos")
         
@@ -181,12 +114,99 @@ class TitulosClient(IOLAPIClient):
         self,
         administradora: str,
         tipo_fondo: str
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
         Obtiene los fondos por administradora y tipo
         
         Args:
-            administradora: Nombre de la administradora
-            tipo_fondo: Tipo de fondo
+            administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
+            tipo_fondo: Tipo de fondo (plazo_fijo_pesos, plazo_fijo_dolares, renta_fija_pesos, etc.)
+            
+        Returns:
+            List[Dict[str, Any]]: Lista de objetos TituloFCIModel con la información de los fondos
         """
-        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos/{tipo_fondo}") 
+        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos/{tipo_fondo}")
+        
+    async def obtener_cotizaciones_panel_todos(
+        self,
+        instrumento: str,
+        pais: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene todas las cotizaciones de un instrumento en un panel
+        
+        Args:
+            instrumento: Tipo de instrumento (opciones, cedears, acciones, etc.)
+            pais: País (estados_Unidos, argentina)
+            
+        Returns:
+            Dict[str, Any]: Objeto InstrumentoModel con la información de las cotizaciones
+        """
+        params = {
+            "cotizacionInstrumentoModel.instrumento": instrumento,
+            "cotizacionInstrumentoModel.pais": pais
+        }
+        return await self.get(f"/api/v2/cotizaciones-orleans-panel/{instrumento}/{pais}/Todos", params=params)
+        
+    async def obtener_cotizaciones_panel_operables(
+        self,
+        instrumento: str,
+        pais: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene las cotizaciones operables de un instrumento en un panel
+        
+        Args:
+            instrumento: Tipo de instrumento (opciones, cedears, acciones, etc.)
+            pais: País (estados_Unidos, argentina)
+            
+        Returns:
+            Dict[str, Any]: Objeto InstrumentoModel con la información de las cotizaciones operables
+        """
+        params = {
+            "cotizacionInstrumentoModel.instrumento": instrumento,
+            "cotizacionInstrumentoModel.pais": pais
+        }
+        return await self.get(f"/api/v2/cotizaciones-orleans-panel/{instrumento}/{pais}/Operables", params=params)
+        
+    async def obtener_cotizacion_detalle_mobile(
+        self,
+        mercado: str,
+        simbolo: str,
+        plazo: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene el detalle de cotización para móvil de un título
+        
+        Args:
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+            simbolo: Símbolo del título
+            plazo: Plazo de la cotización (t0, t1, t2, t3)
+            
+        Returns:
+            Dict[str, Any]: Objeto CotizacionDetalleMobileModel con la información detallada
+        """
+        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/CotizacionDetalleMobile/{plazo}")
+        
+    async def obtener_cotizacion_serie_historica(
+        self,
+        mercado: str,
+        simbolo: str,
+        fecha_desde: str,
+        fecha_hasta: str,
+        ajustada: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Obtiene la serie histórica de cotizaciones de un título
+        
+        Args:
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+            simbolo: Símbolo del título
+            fecha_desde: Fecha desde en formato ISO
+            fecha_hasta: Fecha hasta en formato ISO
+            ajustada: Indica si los datos deben estar ajustados (ajustada, sinAjustar)
+            
+        Returns:
+            List[Dict[str, Any]]: Lista de objetos CotizacionModel con la información histórica
+        """
+        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Cotizacion/seriehistorica/{fecha_desde}/{fecha_hasta}/{ajustada}") 

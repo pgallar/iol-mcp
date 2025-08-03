@@ -1,8 +1,64 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import TitulosClient
+
+class CotizacionModel(BaseModel):
+    """Modelo para representar una cotización según el swagger"""
+    # Aquí se definirían los campos específicos de CotizacionModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class TituloFCIModel(BaseModel):
+    """Modelo para representar un título FCI según el swagger"""
+    # Aquí se definirían los campos específicos de TituloFCIModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class InstrumentoModel(BaseModel):
+    """Modelo para representar un instrumento según el swagger"""
+    # Aquí se definirían los campos específicos de InstrumentoModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class CotizacionDetalleMobileModel(BaseModel):
+    """Modelo para representar una cotización detallada para móvil según el swagger"""
+    # Aquí se definirían los campos específicos de CotizacionDetalleMobileModel
+    # pero no se proporcionan en la especificación del swagger
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
 
 class TitulosRoutes(BaseRoutes):
     def __init__(self):
@@ -16,17 +72,17 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "cotizacion"]
         )
         async def obtener_cotizacion(
-            simbolo: str = Field(description="Símbolo del título"),
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización (t0, t1, t2)")
+            simbolo: str = Field(description="Símbolo del título (Ejemplo: ALUA, APBR)"),
+            mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"]),
+            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización", enum=["t0", "t1", "t2", "t3"])
         ) -> Dict[str, Any]:
             """
             Obtiene la cotización de un título
             
             Args:
-                simbolo: Símbolo del título
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                plazo: Plazo de la cotización (t0, t1, t2)
+                simbolo: Símbolo del título (Ejemplo: ALUA, APBR)
+                mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+                plazo: Plazo de la cotización (t0, t1, t2, t3)
             """
             try:
                 result = await self.client.obtener_cotizacion(
@@ -98,130 +154,6 @@ class TitulosRoutes(BaseRoutes):
                 return {"error": f"Error obteniendo opciones: {str(e)}"}
 
         @mcp.tool(
-            name="obtener_puntas",
-            description="Obtener puntas de un título",
-            tags=["titulos", "puntas"]
-        )
-        async def obtener_puntas(
-            simbolo: str = Field(description="Símbolo del título"),
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización (t0, t1, t2)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene las puntas de un título
-            
-            Args:
-                simbolo: Símbolo del título
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                plazo: Plazo de la cotización (t0, t1, t2)
-            """
-            try:
-                result = await self.client.obtener_puntas(
-                    simbolo=simbolo,
-                    mercado=mercado,
-                    plazo=plazo
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo puntas: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_datos_historicos",
-            description="Obtener datos históricos de un título",
-            tags=["titulos", "historico"]
-        )
-        async def obtener_datos_historicos(
-            simbolo: str = Field(description="Símbolo del título"),
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            desde: str = Field(description="Fecha de inicio en formato YYYY-MM-DD"),
-            hasta: str = Field(description="Fecha de fin en formato YYYY-MM-DD"),
-            ajustado: bool = Field(default=True, description="Indica si los datos deben estar ajustados por dividendos")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los datos históricos de un título
-            
-            Args:
-                simbolo: Símbolo del título
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                desde: Fecha de inicio en formato YYYY-MM-DD
-                hasta: Fecha de fin en formato YYYY-MM-DD
-                ajustado: Indica si los datos deben estar ajustados por dividendos
-            """
-            try:
-                result = await self.client.obtener_datos_historicos(
-                    simbolo=simbolo,
-                    mercado=mercado,
-                    desde=desde,
-                    hasta=hasta,
-                    ajustado=ajustado
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo datos históricos: {str(e)}"}
-                
-        @mcp.tool(
-            name="buscar_titulos",
-            description="Buscar títulos por nombre o símbolo",
-            tags=["titulos", "busqueda"]
-        )
-        async def buscar_titulos(
-            filtro: str = Field(description="Texto a buscar"),
-            mercado: Optional[str] = Field(default=None, description="Mercado del título (bcba, nyse, nasdaq, etc)")
-        ) -> Dict[str, Any]:
-            """
-            Busca títulos por nombre o símbolo
-            
-            Args:
-                filtro: Texto a buscar
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            """
-            try:
-                result = await self.client.buscar_titulos(
-                    filtro=filtro,
-                    mercado=mercado
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error buscando títulos: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_detalle_titulo",
-            description="Obtener información detallada de un título",
-            tags=["titulos", "detalle"]
-        )
-        async def obtener_detalle_titulo(
-            simbolo: str = Field(description="Símbolo del título"),
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene información detallada de un título
-            
-            Args:
-                simbolo: Símbolo del título
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            """
-            try:
-                result = await self.client.obtener_detalle_titulo(
-                    simbolo=simbolo,
-                    mercado=mercado
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo detalle del título: {str(e)}"}
-
-        @mcp.tool(
             name="obtener_instrumentos",
             description="Obtener instrumentos disponibles para un país",
             tags=["titulos", "instrumentos"]
@@ -236,7 +168,9 @@ class TitulosRoutes(BaseRoutes):
                 pais: País (argentina, estados_unidos, etc)
             """
             try:
-                result = await self.client.obtener_instrumentos(pais=pais)
+                result = await self.client.obtener_instrumentos(
+                    pais=pais
+                )
                 return {
                     "success": True,
                     "result": result
@@ -259,13 +193,15 @@ class TitulosRoutes(BaseRoutes):
                 simbolo: Símbolo del FCI (opcional)
             """
             try:
-                result = await self.client.obtener_fci(simbolo=simbolo)
+                result = await self.client.obtener_fci(
+                    simbolo=simbolo
+                )
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo información de FCI: {str(e)}"}
+                return {"error": f"Error obteniendo FCI: {str(e)}"}
 
         @mcp.tool(
             name="obtener_tipos_fondos",
@@ -309,16 +245,18 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "fci"]
         )
         async def obtener_tipos_fondos_por_administradora(
-            administradora: str = Field(description="Nombre de la administradora")
+            administradora: str = Field(description="Nombre de la administradora", enum=["cONVEXITY", "sUPERVIELLE"])
         ) -> Dict[str, Any]:
             """
             Obtiene los tipos de fondos por administradora
             
             Args:
-                administradora: Nombre de la administradora
+                administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
             """
             try:
-                result = await self.client.obtener_tipos_fondos_por_administradora(administradora=administradora)
+                result = await self.client.obtener_tipos_fondos_por_administradora(
+                    administradora=administradora
+                )
                 return {
                     "success": True,
                     "result": result
@@ -332,15 +270,18 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "fci"]
         )
         async def obtener_fondos_por_administradora_y_tipo(
-            administradora: str = Field(description="Nombre de la administradora"),
-            tipo_fondo: str = Field(description="Tipo de fondo")
+            administradora: str = Field(description="Nombre de la administradora", enum=["cONVEXITY", "sUPERVIELLE"]),
+            tipo_fondo: str = Field(description="Tipo de fondo", enum=[
+                "plazo_fijo_pesos", "plazo_fijo_dolares", "renta_fija_pesos", "renta_fija_dolares",
+                "renta_mixta_pesos", "renta_mixta_dolares", "renta_variable_pesos", "renta_variable_dolares"
+            ])
         ) -> Dict[str, Any]:
             """
             Obtiene los fondos por administradora y tipo
             
             Args:
-                administradora: Nombre de la administradora
-                tipo_fondo: Tipo de fondo
+                administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
+                tipo_fondo: Tipo de fondo (plazo_fijo_pesos, plazo_fijo_dolares, etc.)
             """
             try:
                 result = await self.client.obtener_fondos_por_administradora_y_tipo(
@@ -352,4 +293,134 @@ class TitulosRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo fondos por administradora y tipo: {str(e)}"} 
+                return {"error": f"Error obteniendo fondos por administradora y tipo: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cotizaciones_panel_todos",
+            description="Obtener todas las cotizaciones de un instrumento en un panel",
+            tags=["titulos", "panel", "cotizaciones"]
+        )
+        async def obtener_cotizaciones_panel_todos(
+            instrumento: str = Field(description="Tipo de instrumento", enum=[
+                "opciones", "cedears", "acciones", "aDRs", "titulosPublicos", "cauciones",
+                "cHPD", "futuros", "obligacionesNegociables", "letras"
+            ]),
+            pais: str = Field(description="País", enum=["estados_Unidos", "argentina"])
+        ) -> Dict[str, Any]:
+            """
+            Obtiene todas las cotizaciones de un instrumento en un panel
+            
+            Args:
+                instrumento: Tipo de instrumento (opciones, cedears, acciones, etc.)
+                pais: País (estados_Unidos, argentina)
+            """
+            try:
+                result = await self.client.obtener_cotizaciones_panel_todos(
+                    instrumento=instrumento,
+                    pais=pais
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo cotizaciones del panel: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cotizaciones_panel_operables",
+            description="Obtener cotizaciones operables de un instrumento en un panel",
+            tags=["titulos", "panel", "cotizaciones", "operables"]
+        )
+        async def obtener_cotizaciones_panel_operables(
+            instrumento: str = Field(description="Tipo de instrumento", enum=[
+                "opciones", "cedears", "acciones", "aDRs", "titulosPublicos", "cauciones",
+                "cHPD", "futuros", "obligacionesNegociables", "letras"
+            ]),
+            pais: str = Field(description="País", enum=["estados_Unidos", "argentina"])
+        ) -> Dict[str, Any]:
+            """
+            Obtiene las cotizaciones operables de un instrumento en un panel
+            
+            Args:
+                instrumento: Tipo de instrumento (opciones, cedears, acciones, etc.)
+                pais: País (estados_Unidos, argentina)
+            """
+            try:
+                result = await self.client.obtener_cotizaciones_panel_operables(
+                    instrumento=instrumento,
+                    pais=pais
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo cotizaciones operables del panel: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cotizacion_detalle_mobile",
+            description="Obtener detalle de cotización para móvil de un título",
+            tags=["titulos", "cotizacion", "mobile"]
+        )
+        async def obtener_cotizacion_detalle_mobile(
+            mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"]),
+            simbolo: str = Field(description="Símbolo del título"),
+            plazo: str = Field(description="Plazo de la cotización", enum=["t0", "t1", "t2", "t3"])
+        ) -> Dict[str, Any]:
+            """
+            Obtiene el detalle de cotización para móvil de un título
+            
+            Args:
+                mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+                simbolo: Símbolo del título
+                plazo: Plazo de la cotización (t0, t1, t2, t3)
+            """
+            try:
+                result = await self.client.obtener_cotizacion_detalle_mobile(
+                    mercado=mercado,
+                    simbolo=simbolo,
+                    plazo=plazo
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo detalle de cotización para móvil: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cotizacion_serie_historica",
+            description="Obtener serie histórica de cotizaciones de un título",
+            tags=["titulos", "cotizacion", "historica"]
+        )
+        async def obtener_cotizacion_serie_historica(
+            mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"]),
+            simbolo: str = Field(description="Símbolo del título"),
+            fecha_desde: str = Field(description="Fecha desde en formato ISO (YYYY-MM-DD)"),
+            fecha_hasta: str = Field(description="Fecha hasta en formato ISO (YYYY-MM-DD)"),
+            ajustada: str = Field(description="Indica si los datos deben estar ajustados", enum=["ajustada", "sinAjustar"])
+        ) -> Dict[str, Any]:
+            """
+            Obtiene la serie histórica de cotizaciones de un título
+            
+            Args:
+                mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+                simbolo: Símbolo del título
+                fecha_desde: Fecha desde en formato ISO
+                fecha_hasta: Fecha hasta en formato ISO
+                ajustada: Indica si los datos deben estar ajustados (ajustada, sinAjustar)
+            """
+            try:
+                result = await self.client.obtener_cotizacion_serie_historica(
+                    mercado=mercado,
+                    simbolo=simbolo,
+                    fecha_desde=fecha_desde,
+                    fecha_hasta=fecha_hasta,
+                    ajustada=ajustada
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo serie histórica de cotizaciones: {str(e)}"} 

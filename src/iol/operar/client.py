@@ -2,104 +2,50 @@ from typing import Dict, Any, Optional, List
 from ..http_client import IOLAPIClient
 
 class OperarClient(IOLAPIClient):
-    async def obtener_ordenes_pendientes(
-        self,
-        pais: Optional[str] = None,
-        mercado: Optional[str] = None,
-        simbolo: Optional[str] = None,
-        tipo_orden: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Obtiene las órdenes pendientes del usuario
-        
-        Args:
-            pais: País de las órdenes (argentina, estados_unidos, etc)
-            mercado: Mercado de las órdenes (bcba, nyse, nasdaq, etc)
-            simbolo: Símbolo del título
-            tipo_orden: Tipo de orden (compra, venta)
-        """
-        endpoint = "/api/v2/Operar/OrdenesPendientes"
-        params = {}
-        if pais:
-            params["pais"] = pais
-        if mercado:
-            params["mercado"] = mercado
-        if simbolo:
-            params["simbolo"] = simbolo
-        if tipo_orden:
-            params["tipoOrden"] = tipo_orden
-        return await self.get(endpoint, params=params)
-
-    async def obtener_ordenes_finalizadas(
-        self,
-        pais: Optional[str] = None,
-        mercado: Optional[str] = None,
-        simbolo: Optional[str] = None,
-        tipo_orden: Optional[str] = None,
-        fecha_desde: Optional[str] = None,
-        fecha_hasta: Optional[str] = None,
-        estado: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Obtiene las órdenes finalizadas del usuario
-        
-        Args:
-            pais: País de las órdenes (argentina, estados_unidos, etc)
-            mercado: Mercado de las órdenes (bcba, nyse, nasdaq, etc)
-            simbolo: Símbolo del título
-            tipo_orden: Tipo de orden (compra, venta)
-            fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-            fecha_hasta: Fecha de fin en formato YYYY-MM-DD
-            estado: Estado de las órdenes (todas, terminadas, canceladas)
-        """
-        endpoint = "/api/v2/Operar/OrdenesFinalizadas"
-        params = {}
-        if pais:
-            params["pais"] = pais
-        if mercado:
-            params["mercado"] = mercado
-        if simbolo:
-            params["simbolo"] = simbolo
-        if tipo_orden:
-            params["tipoOrden"] = tipo_orden
-        if fecha_desde:
-            params["fechaDesde"] = fecha_desde
-        if fecha_hasta:
-            params["fechaHasta"] = fecha_hasta
-        if estado:
-            params["estado"] = estado
-        return await self.get(endpoint, params=params)
-
     async def comprar(
         self,
         mercado: str,
         simbolo: str,
-        cantidad: float,
         precio: float,
         plazo: str,
-        validez: Optional[str] = None
+        validez: str,
+        cantidad: Optional[float] = None,
+        tipo_orden: Optional[str] = None,
+        monto: Optional[float] = None,
+        id_fuente: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Crea una orden de compra
         
         Args:
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
             simbolo: Símbolo del título
-            cantidad: Cantidad a comprar
             precio: Precio de compra
-            plazo: Plazo de la operación (t0, t1, t2)
-            validez: Fecha de validez de la orden en formato YYYY-MM-DD
+            plazo: Plazo de la operación (t0, t1, t2, t3)
+            validez: Fecha de validez de la orden en formato ISO
+            cantidad: Cantidad a comprar (opcional)
+            tipo_orden: Tipo de orden (precioLimite, precioMercado) (opcional)
+            monto: Monto efectivo a invertir (opcional)
+            id_fuente: ID de la fuente (opcional)
         """
         data = {
             "mercado": mercado,
             "simbolo": simbolo,
-            "cantidad": cantidad,
             "precio": precio,
             "plazo": plazo,
+            "validez": validez
         }
-        if validez:
-            data["validez"] = validez
-        return await self.post("/api/v2/Operar/Comprar", json=data)
+        
+        if cantidad is not None:
+            data["cantidad"] = cantidad
+        if tipo_orden:
+            data["tipoOrden"] = tipo_orden
+        if monto is not None:
+            data["monto"] = monto
+        if id_fuente is not None:
+            data["idFuente"] = id_fuente
+            
+        return await self.post("/api/v2/operar/Comprar", json=data)
 
     async def vender(
         self,
@@ -107,151 +53,46 @@ class OperarClient(IOLAPIClient):
         simbolo: str,
         cantidad: float,
         precio: float,
-        plazo: str,
-        validez: Optional[str] = None
+        validez: str,
+        tipo_orden: Optional[str] = None,
+        plazo: Optional[str] = None,
+        id_fuente: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Crea una orden de venta
         
         Args:
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
             simbolo: Símbolo del título
             cantidad: Cantidad a vender
             precio: Precio de venta
-            plazo: Plazo de la operación (t0, t1, t2)
-            validez: Fecha de validez de la orden en formato YYYY-MM-DD
+            validez: Fecha de validez de la orden en formato ISO
+            tipo_orden: Tipo de orden (precioLimite, precioMercado) (opcional)
+            plazo: Plazo de la operación (t0, t1, t2, t3) (opcional)
+            id_fuente: ID de la fuente (opcional)
         """
         data = {
             "mercado": mercado,
             "simbolo": simbolo,
             "cantidad": cantidad,
             "precio": precio,
-            "plazo": plazo,
+            "validez": validez
         }
-        if validez:
-            data["validez"] = validez
-        return await self.post("/api/v2/Operar/Vender", json=data)
-
-    async def cancelar_orden(
-        self,
-        numero: str
-    ) -> Dict[str, Any]:
-        """
-        Cancela una orden
         
-        Args:
-            numero: Número de orden
-        """
-        return await self.delete(f"/api/v2/Operar/CancelarOrden/{numero}")
-
-    async def obtener_estado_orden(
-        self,
-        numero: str
-    ) -> Dict[str, Any]:
-        """
-        Obtiene el estado de una orden
-        
-        Args:
-            numero: Número de orden
-        """
-        return await self.get(f"/api/v2/Operar/EstadoOrden/{numero}")
-        
-    async def obtener_plazos(
-        self,
-        mercado: str,
-        simbolo: str
-    ) -> Dict[str, Any]:
-        """
-        Obtiene los plazos disponibles para operar un título
-        
-        Args:
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            simbolo: Símbolo del título
-        """
-        endpoint = f"/api/v2/Operar/Plazos/{mercado}/{simbolo}"
-        return await self.get(endpoint)
-        
-    async def obtener_panel_operaciones(
-        self,
-        instrumento: str,
-        pais: str
-    ) -> Dict[str, Any]:
-        """
-        Obtiene el panel de operaciones para un instrumento
-        
-        Args:
-            instrumento: Tipo de instrumento (Acciones, Bonos, Opciones, etc)
-            pais: País del panel (argentina, estados_unidos, etc)
-        """
-        endpoint = f"/api/v2/Operar/PanelOperaciones/{instrumento}/{pais}"
-        return await self.get(endpoint)
-        
-    async def comprar_valor_efectivo(
-        self,
-        mercado: str,
-        simbolo: str,
-        monto: float,
-        precio: float,
-        plazo: str,
-        validez: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Crea una orden de compra por valor efectivo
-        
-        Args:
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            simbolo: Símbolo del título
-            monto: Monto efectivo a invertir
-            precio: Precio de compra
-            plazo: Plazo de la operación (t0, t1, t2)
-            validez: Fecha de validez de la orden en formato YYYY-MM-DD
-        """
-        data = {
-            "mercado": mercado,
-            "simbolo": simbolo,
-            "monto": monto,
-            "precio": precio,
-            "plazo": plazo,
-        }
-        if validez:
-            data["validez"] = validez
-        return await self.post("/api/v2/Operar/ComprarValorEfectivo", json=data)
-        
-    async def vender_valor_nominal(
-        self,
-        mercado: str,
-        simbolo: str,
-        valor_nominal: float,
-        precio: float,
-        plazo: str,
-        validez: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Crea una orden de venta por valor nominal
-        
-        Args:
-            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-            simbolo: Símbolo del título
-            valor_nominal: Valor nominal a vender
-            precio: Precio de venta
-            plazo: Plazo de la operación (t0, t1, t2)
-            validez: Fecha de validez de la orden en formato YYYY-MM-DD
-        """
-        data = {
-            "mercado": mercado,
-            "simbolo": simbolo,
-            "valorNominal": valor_nominal,
-            "precio": precio,
-            "plazo": plazo,
-        }
-        if validez:
-            data["validez"] = validez
-        return await self.post("/api/v2/Operar/VenderValorNominal", json=data)
+        if tipo_orden:
+            data["tipoOrden"] = tipo_orden
+        if plazo:
+            data["plazo"] = plazo
+        if id_fuente is not None:
+            data["idFuente"] = id_fuente
+            
+        return await self.post("/api/v2/operar/Vender", json=data)
         
     async def suscribir_fci(
         self,
         simbolo: str,
-        monto: float
+        monto: float,
+        solo_validar: Optional[bool] = None
     ) -> Dict[str, Any]:
         """
         Suscribe un FCI
@@ -259,17 +100,23 @@ class OperarClient(IOLAPIClient):
         Args:
             simbolo: Símbolo del FCI
             monto: Monto a suscribir
+            solo_validar: Indica si solo se debe validar la operación sin ejecutarla (opcional)
         """
         data = {
             "simbolo": simbolo,
             "monto": monto
         }
-        return await self.post("/api/v2/Operar/Suscripcion/FCI", json=data)
+        
+        if solo_validar is not None:
+            data["soloValidar"] = solo_validar
+            
+        return await self.post("/api/v2/operar/suscripcion/fci", json=data)
         
     async def rescatar_fci(
         self,
         simbolo: str,
-        cantidad: float
+        cantidad: float,
+        solo_validar: Optional[bool] = None
     ) -> Dict[str, Any]:
         """
         Rescata un FCI
@@ -277,9 +124,209 @@ class OperarClient(IOLAPIClient):
         Args:
             simbolo: Símbolo del FCI
             cantidad: Cantidad a rescatar
+            solo_validar: Indica si solo se debe validar la operación sin ejecutarla (opcional)
         """
         data = {
             "simbolo": simbolo,
             "cantidad": cantidad
         }
-        return await self.post("/api/v2/Operar/Rescate/FCI", json=data) 
+        
+        if solo_validar is not None:
+            data["soloValidar"] = solo_validar
+            
+        return await self.post("/api/v2/operar/rescate/fci", json=data)
+        
+    async def cpd_puede_operar(self) -> Dict[str, Any]:
+        """
+        Verifica si el usuario puede operar con cheques de pago diferido
+        
+        Returns:
+            Dict[str, Any]: Objeto CPDPuedeOperarModel con la información de si puede operar
+        """
+        return await self.get("/api/v2/operar/CPD/PuedeOperar")
+        
+    async def obtener_cpd(
+        self,
+        estado: str,
+        segmento: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los cheques de pago diferido según estado y segmento
+        
+        Args:
+            estado: Estado de los cheques
+            segmento: Segmento de los cheques
+            
+        Returns:
+            Dict[str, Any]: Objeto CPDModel con la información de los cheques
+        """
+        return await self.get(f"/api/v2/operar/CPD/{estado}/{segmento}")
+        
+    async def calcular_comisiones_cpd(
+        self,
+        importe: float,
+        plazo: int,
+        tasa: float
+    ) -> Dict[str, Any]:
+        """
+        Calcula las comisiones para un cheque de pago diferido
+        
+        Args:
+            importe: Importe del cheque
+            plazo: Plazo en días
+            tasa: Tasa de descuento
+            
+        Returns:
+            Dict[str, Any]: Objeto ComisionCPDDTO con la información de las comisiones
+        """
+        return await self.get(f"/api/v2/operar/CPD/Comisiones/{importe}/{plazo}/{tasa}")
+        
+    async def operar_cpd(
+        self,
+        id_subasta: int,
+        tasa: float,
+        fuente: str
+    ) -> Dict[str, Any]:
+        """
+        Realiza una operación con un cheque de pago diferido
+        
+        Args:
+            id_subasta: ID de la subasta
+            tasa: Tasa de descuento
+            fuente: Fuente de la operación
+            
+        Returns:
+            Dict[str, Any]: Objeto CPDTransaccionFinalModel con el resultado de la operación
+        """
+        data = {
+            "idSubasta": id_subasta,
+            "tasa": tasa,
+            "fuente": fuente
+        }
+        return await self.post("/api/v2/operar/CPD", json=data)
+        
+    async def generar_token(
+        self,
+        mercado: Optional[str] = None,
+        simbolo: Optional[str] = None,
+        cantidad: Optional[float] = None,
+        monto: Optional[float] = None
+    ) -> Dict[str, Any]:
+        """
+        Genera un token para operaciones
+        
+        Args:
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX) (opcional)
+            simbolo: Símbolo del título (opcional)
+            cantidad: Cantidad (opcional)
+            monto: Monto (opcional)
+            
+        Returns:
+            Dict[str, Any]: Objeto JWTResultDTO con el token generado
+        """
+        data = {}
+        if mercado:
+            data["mercado"] = mercado
+        if simbolo:
+            data["simbolo"] = simbolo
+        if cantidad is not None:
+            data["cantidad"] = cantidad
+        if monto is not None:
+            data["monto"] = monto
+            
+        return await self.post("/api/v2/operar/Token", json=data)
+        
+    async def vender_especie_d(
+        self,
+        mercado: str,
+        simbolo: str,
+        cantidad: float,
+        precio: float,
+        validez: str,
+        id_cuenta_bancaria: int,
+        tipo_orden: Optional[str] = None,
+        plazo: Optional[str] = None,
+        id_fuente: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Crea una orden de venta de especie D
+        
+        Args:
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+            simbolo: Símbolo del título
+            cantidad: Cantidad a vender
+            precio: Precio de venta
+            validez: Fecha de validez de la orden en formato ISO
+            id_cuenta_bancaria: ID de la cuenta bancaria
+            tipo_orden: Tipo de orden (precioLimite, precioMercado) (opcional)
+            plazo: Plazo de la operación (t0, t1, t2, t3) (opcional)
+            id_fuente: ID de la fuente (opcional)
+            
+        Returns:
+            Dict[str, Any]: Objeto ResponseModel con el resultado de la operación
+        """
+        data = {
+            "mercado": mercado,
+            "simbolo": simbolo,
+            "cantidad": cantidad,
+            "precio": precio,
+            "validez": validez,
+            "idCuentaBancaria": id_cuenta_bancaria
+        }
+        
+        if tipo_orden:
+            data["tipoOrden"] = tipo_orden
+        if plazo:
+            data["plazo"] = plazo
+        if id_fuente is not None:
+            data["idFuente"] = id_fuente
+            
+        return await self.post("/api/v2/operar/VenderEspecieD", json=data)
+        
+    async def comprar_especie_d(
+        self,
+        mercado: str,
+        simbolo: str,
+        precio: float,
+        plazo: str,
+        validez: str,
+        cantidad: Optional[float] = None,
+        tipo_orden: Optional[str] = None,
+        monto: Optional[float] = None,
+        id_fuente: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Crea una orden de compra de especie D
+        
+        Args:
+            mercado: Mercado del título (bCBA, nYSE, nASDAQ, aMEX, bCS, rOFX)
+            simbolo: Símbolo del título
+            precio: Precio de compra
+            plazo: Plazo de la operación (t0, t1, t2, t3)
+            validez: Fecha de validez de la orden en formato ISO
+            cantidad: Cantidad a comprar (opcional)
+            tipo_orden: Tipo de orden (precioLimite, precioMercado) (opcional)
+            monto: Monto efectivo a invertir (opcional)
+            id_fuente: ID de la fuente (opcional)
+            
+        Returns:
+            Dict[str, Any]: Objeto ResponseModel con el resultado de la operación
+        """
+        data = {
+            "mercado": mercado,
+            "simbolo": simbolo,
+            "precio": precio,
+            "plazo": plazo,
+            "validez": validez
+        }
+        
+        if cantidad is not None:
+            data["cantidad"] = cantidad
+        if tipo_orden:
+            data["tipoOrden"] = tipo_orden
+        if monto is not None:
+            data["monto"] = monto
+        if id_fuente is not None:
+            data["idFuente"] = id_fuente
+            
+        return await self.post("/api/v2/operar/ComprarEspecieD", json=data) 

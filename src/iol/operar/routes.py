@@ -1,8 +1,142 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import OperarClient
+
+class ComprarBindingModel(BaseModel):
+    """Modelo para la operación de compra según el swagger"""
+    mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"])
+    simbolo: str = Field(description="Símbolo del título")
+    precio: float = Field(description="Precio de compra")
+    plazo: str = Field(description="Plazo de la operación", enum=["t0", "t1", "t2", "t3"])
+    validez: str = Field(description="Fecha de validez de la orden en formato ISO")
+    cantidad: Optional[float] = Field(default=None, description="Cantidad a comprar")
+    tipoOrden: Optional[str] = Field(default=None, description="Tipo de orden", enum=["precioLimite", "precioMercado"])
+    monto: Optional[float] = Field(default=None, description="Monto efectivo a invertir")
+    idFuente: Optional[int] = Field(default=None, description="ID de la fuente")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class VenderBindingModel(BaseModel):
+    """Modelo para la operación de venta según el swagger"""
+    mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"])
+    simbolo: str = Field(description="Símbolo del título")
+    cantidad: float = Field(description="Cantidad a vender")
+    precio: float = Field(description="Precio de venta")
+    validez: str = Field(description="Fecha de validez de la orden en formato ISO")
+    tipoOrden: Optional[str] = Field(default=None, description="Tipo de orden", enum=["precioLimite", "precioMercado"])
+    plazo: Optional[str] = Field(default=None, description="Plazo de la operación", enum=["t0", "t1", "t2", "t3"])
+    idFuente: Optional[int] = Field(default=None, description="ID de la fuente")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class SuscripcionFCIBindingModel(BaseModel):
+    """Modelo para la suscripción de FCI según el swagger"""
+    simbolo: str = Field(description="Símbolo del FCI")
+    monto: float = Field(description="Monto a suscribir")
+    soloValidar: Optional[bool] = Field(default=None, description="Indica si solo se debe validar la operación sin ejecutarla")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class RescateFCIBindingModel(BaseModel):
+    """Modelo para el rescate de FCI según el swagger"""
+    simbolo: str = Field(description="Símbolo del FCI")
+    cantidad: float = Field(description="Cantidad a rescatar")
+    soloValidar: Optional[bool] = Field(default=None, description="Indica si solo se debe validar la operación sin ejecutarla")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class CPDBindingModel(BaseModel):
+    """Modelo para la operación con cheques de pago diferido según el swagger"""
+    idSubasta: int = Field(description="ID de la subasta")
+    tasa: float = Field(description="Tasa de descuento")
+    fuente: str = Field(
+        description="Fuente de la operación",
+        enum=[
+            "compra_Venta_Por_Web", "compra_Venta_Por_Celular", "venta_De_Opciones_Por_Web_Lanzamiento",
+            "asesores_IOL", "compra_Venta_Por_Web_V6", "venta_De_Opciones_Por_Asesores_IOL_Lanzamiento",
+            "suscripcion_Cuenta_Facil", "compra_Venta_Por_Mobile", "asesores_IOL_Mobile",
+            "quick_Trade_Dock", "asesores_Quick_Trade_Dock", "aPI", "cARGA_CHEQUE_IOLNET_Manual",
+            "cARGA_CHEQUE_IOLNET_EXCEL", "cARGA_CHEQUE_IOLV6", "cARGA_CHEQUE_IOLNET_TTR",
+            "operatoria_Android", "operatoria_iOS", "generada_Completadas_Manualmente_SENEBI",
+            "dolar_Bolsa", "contado_Con_Liqui", "asesores_IOL_API", "aPP_MOBILE_ANDROID", "aPP_MOBILE_IOS"
+        ]
+    )
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class RequestTokenDDJJDTO(BaseModel):
+    """Modelo para la solicitud de token según el swagger"""
+    mercado: Optional[str] = Field(default=None, description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"])
+    simbolo: Optional[str] = Field(default=None, description="Símbolo del título")
+    cantidad: Optional[float] = Field(default=None, description="Cantidad")
+    monto: Optional[float] = Field(default=None, description="Monto")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+class VenderDBindingModel(BaseModel):
+    """Modelo para la venta de especie D según el swagger"""
+    mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"])
+    simbolo: str = Field(description="Símbolo del título")
+    cantidad: float = Field(description="Cantidad a vender")
+    precio: float = Field(description="Precio de venta")
+    validez: str = Field(description="Fecha de validez de la orden en formato ISO")
+    idCuentaBancaria: int = Field(description="ID de la cuenta bancaria")
+    tipoOrden: Optional[str] = Field(default=None, description="Tipo de orden", enum=["precioLimite", "precioMercado"])
+    plazo: Optional[str] = Field(default=None, description="Plazo de la operación", enum=["t0", "t1", "t2", "t3"])
+    idFuente: Optional[int] = Field(default=None, description="ID de la fuente")
+    
+    model_config = ConfigDict(extra="ignore", validate_assignment=True)
+    
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
 
 class OperarRoutes(BaseRoutes):
     def __init__(self):
@@ -11,114 +145,41 @@ class OperarRoutes(BaseRoutes):
 
     def register_tools(self, mcp: FastMCP):
         @mcp.tool(
-            name="obtener_ordenes_pendientes",
-            description="Obtener órdenes pendientes del usuario",
-            tags=["operar", "ordenes"]
-        )
-        async def obtener_ordenes_pendientes(
-            pais: Optional[str] = Field(default=None, description="País de las órdenes (argentina, estados_unidos, etc)"),
-            mercado: Optional[str] = Field(default=None, description="Mercado de las órdenes (bcba, nyse, nasdaq, etc)"),
-            simbolo: Optional[str] = Field(default=None, description="Símbolo del título"),
-            tipo_orden: Optional[str] = Field(default=None, description="Tipo de orden (compra, venta)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene las órdenes pendientes del usuario
-            
-            Args:
-                pais: País de las órdenes (argentina, estados_unidos, etc)
-                mercado: Mercado de las órdenes (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                tipo_orden: Tipo de orden (compra, venta)
-            """
-            try:
-                result = await self.client.obtener_ordenes_pendientes(
-                    pais=pais,
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    tipo_orden=tipo_orden
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo órdenes pendientes: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_ordenes_finalizadas",
-            description="Obtener órdenes finalizadas del usuario",
-            tags=["operar", "ordenes"]
-        )
-        async def obtener_ordenes_finalizadas(
-            pais: Optional[str] = Field(default=None, description="País de las órdenes (argentina, estados_unidos, etc)"),
-            mercado: Optional[str] = Field(default=None, description="Mercado de las órdenes (bcba, nyse, nasdaq, etc)"),
-            simbolo: Optional[str] = Field(default=None, description="Símbolo del título"),
-            tipo_orden: Optional[str] = Field(default=None, description="Tipo de orden (compra, venta)"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha de inicio en formato YYYY-MM-DD"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha de fin en formato YYYY-MM-DD"),
-            estado: Optional[str] = Field(default=None, description="Estado de las órdenes (todas, terminadas, canceladas)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene las órdenes finalizadas del usuario
-            
-            Args:
-                pais: País de las órdenes (argentina, estados_unidos, etc)
-                mercado: Mercado de las órdenes (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                tipo_orden: Tipo de orden (compra, venta)
-                fecha_desde: Fecha de inicio en formato YYYY-MM-DD
-                fecha_hasta: Fecha de fin en formato YYYY-MM-DD
-                estado: Estado de las órdenes (todas, terminadas, canceladas)
-            """
-            try:
-                result = await self.client.obtener_ordenes_finalizadas(
-                    pais=pais,
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    tipo_orden=tipo_orden,
-                    fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta,
-                    estado=estado
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo órdenes finalizadas: {str(e)}"}
-
-        @mcp.tool(
             name="comprar",
             description="Crear una orden de compra",
             tags=["operar", "compra"]
         )
         async def comprar(
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            simbolo: str = Field(description="Símbolo del título"),
-            cantidad: float = Field(description="Cantidad a comprar"),
-            precio: float = Field(description="Precio de compra"),
-            plazo: str = Field(description="Plazo de la operación (t0, t1, t2)"),
-            validez: Optional[str] = Field(default=None, description="Fecha de validez de la orden en formato YYYY-MM-DD")
+            request: ComprarBindingModel = Field(
+                description="Datos para la orden de compra",
+                example={
+                    "mercado": "bCBA",
+                    "simbolo": "GGAL",
+                    "precio": 100.5,
+                    "plazo": "t2",
+                    "validez": "2023-12-31T23:59:59",
+                    "cantidad": 10,
+                    "tipoOrden": "precioLimite"
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Crea una orden de compra
             
             Args:
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                cantidad: Cantidad a comprar
-                precio: Precio de compra
-                plazo: Plazo de la operación (t0, t1, t2)
-                validez: Fecha de validez de la orden en formato YYYY-MM-DD
+                request: Datos para la orden de compra
             """
             try:
                 result = await self.client.comprar(
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    cantidad=cantidad,
-                    precio=precio,
-                    plazo=plazo,
-                    validez=validez
+                    mercado=request.mercado,
+                    simbolo=request.simbolo,
+                    precio=request.precio,
+                    plazo=request.plazo,
+                    validez=request.validez,
+                    cantidad=request.cantidad,
+                    tipo_orden=request.tipoOrden,
+                    monto=request.monto,
+                    id_fuente=request.idFuente
                 )
                 return {
                     "success": True,
@@ -133,32 +194,35 @@ class OperarRoutes(BaseRoutes):
             tags=["operar", "venta"]
         )
         async def vender(
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            simbolo: str = Field(description="Símbolo del título"),
-            cantidad: float = Field(description="Cantidad a vender"),
-            precio: float = Field(description="Precio de venta"),
-            plazo: str = Field(description="Plazo de la operación (t0, t1, t2)"),
-            validez: Optional[str] = Field(default=None, description="Fecha de validez de la orden en formato YYYY-MM-DD")
+            request: VenderBindingModel = Field(
+                description="Datos para la orden de venta",
+                example={
+                    "mercado": "bCBA",
+                    "simbolo": "GGAL",
+                    "cantidad": 10,
+                    "precio": 100.5,
+                    "validez": "2023-12-31T23:59:59",
+                    "tipoOrden": "precioLimite",
+                    "plazo": "t2"
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Crea una orden de venta
             
             Args:
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                cantidad: Cantidad a vender
-                precio: Precio de venta
-                plazo: Plazo de la operación (t0, t1, t2)
-                validez: Fecha de validez de la orden en formato YYYY-MM-DD
+                request: Datos para la orden de venta
             """
             try:
                 result = await self.client.vender(
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    cantidad=cantidad,
-                    precio=precio,
-                    plazo=plazo,
-                    validez=validez
+                    mercado=request.mercado,
+                    simbolo=request.simbolo,
+                    cantidad=request.cantidad,
+                    precio=request.precio,
+                    validez=request.validez,
+                    tipo_orden=request.tipoOrden,
+                    plazo=request.plazo,
+                    id_fuente=request.idFuente
                 )
                 return {
                     "success": True,
@@ -166,188 +230,6 @@ class OperarRoutes(BaseRoutes):
                 }
             except Exception as e:
                 return {"error": f"Error creando orden de venta: {str(e)}"}
-
-        @mcp.tool(
-            name="cancelar_orden",
-            description="Cancelar una orden",
-            tags=["operar", "cancelar"]
-        )
-        async def cancelar_orden(
-            numero: str = Field(description="Número de orden")
-        ) -> Dict[str, Any]:
-            """
-            Cancela una orden
-            
-            Args:
-                numero: Número de orden
-            """
-            try:
-                result = await self.client.cancelar_orden(numero=numero)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error cancelando orden: {str(e)}"}
-
-        @mcp.tool(
-            name="obtener_estado_orden",
-            description="Obtener estado de una orden",
-            tags=["operar", "estado"]
-        )
-        async def obtener_estado_orden(
-            numero: str = Field(description="Número de orden")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene el estado de una orden
-            
-            Args:
-                numero: Número de orden
-            """
-            try:
-                result = await self.client.obtener_estado_orden(numero=numero)
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo estado de orden: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_plazos",
-            description="Obtener plazos disponibles para operar un título",
-            tags=["operar", "plazos"]
-        )
-        async def obtener_plazos(
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            simbolo: str = Field(description="Símbolo del título")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los plazos disponibles para operar un título
-            
-            Args:
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-            """
-            try:
-                result = await self.client.obtener_plazos(
-                    mercado=mercado,
-                    simbolo=simbolo
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo plazos: {str(e)}"}
-                
-        @mcp.tool(
-            name="obtener_panel_operaciones",
-            description="Obtener panel de operaciones para un instrumento",
-            tags=["operar", "panel"]
-        )
-        async def obtener_panel_operaciones(
-            instrumento: str = Field(description="Tipo de instrumento (Acciones, Bonos, Opciones, etc)"),
-            pais: str = Field(description="País del panel (argentina, estados_unidos, etc)")
-        ) -> Dict[str, Any]:
-            """
-            Obtiene el panel de operaciones para un instrumento
-            
-            Args:
-                instrumento: Tipo de instrumento (Acciones, Bonos, Opciones, etc)
-                pais: País del panel (argentina, estados_unidos, etc)
-            """
-            try:
-                result = await self.client.obtener_panel_operaciones(
-                    instrumento=instrumento,
-                    pais=pais
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo panel de operaciones: {str(e)}"}
-                
-        @mcp.tool(
-            name="comprar_valor_efectivo",
-            description="Crear una orden de compra por valor efectivo",
-            tags=["operar", "compra"]
-        )
-        async def comprar_valor_efectivo(
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            simbolo: str = Field(description="Símbolo del título"),
-            monto: float = Field(description="Monto efectivo a invertir"),
-            precio: float = Field(description="Precio de compra"),
-            plazo: str = Field(description="Plazo de la operación (t0, t1, t2)"),
-            validez: Optional[str] = Field(default=None, description="Fecha de validez de la orden en formato YYYY-MM-DD")
-        ) -> Dict[str, Any]:
-            """
-            Crea una orden de compra por valor efectivo
-            
-            Args:
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                monto: Monto efectivo a invertir
-                precio: Precio de compra
-                plazo: Plazo de la operación (t0, t1, t2)
-                validez: Fecha de validez de la orden en formato YYYY-MM-DD
-            """
-            try:
-                result = await self.client.comprar_valor_efectivo(
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    monto=monto,
-                    precio=precio,
-                    plazo=plazo,
-                    validez=validez
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error creando orden de compra por valor efectivo: {str(e)}"}
-                
-        @mcp.tool(
-            name="vender_valor_nominal",
-            description="Crear una orden de venta por valor nominal",
-            tags=["operar", "venta"]
-        )
-        async def vender_valor_nominal(
-            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
-            simbolo: str = Field(description="Símbolo del título"),
-            valor_nominal: float = Field(description="Valor nominal a vender"),
-            precio: float = Field(description="Precio de venta"),
-            plazo: str = Field(description="Plazo de la operación (t0, t1, t2)"),
-            validez: Optional[str] = Field(default=None, description="Fecha de validez de la orden en formato YYYY-MM-DD")
-        ) -> Dict[str, Any]:
-            """
-            Crea una orden de venta por valor nominal
-            
-            Args:
-                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
-                simbolo: Símbolo del título
-                valor_nominal: Valor nominal a vender
-                precio: Precio de venta
-                plazo: Plazo de la operación (t0, t1, t2)
-                validez: Fecha de validez de la orden en formato YYYY-MM-DD
-            """
-            try:
-                result = await self.client.vender_valor_nominal(
-                    mercado=mercado,
-                    simbolo=simbolo,
-                    valor_nominal=valor_nominal,
-                    precio=precio,
-                    plazo=plazo,
-                    validez=validez
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error creando orden de venta por valor nominal: {str(e)}"}
                 
         @mcp.tool(
             name="suscribir_fci",
@@ -355,20 +237,26 @@ class OperarRoutes(BaseRoutes):
             tags=["operar", "fci"]
         )
         async def suscribir_fci(
-            simbolo: str = Field(description="Símbolo del FCI"),
-            monto: float = Field(description="Monto a suscribir")
+            request: SuscripcionFCIBindingModel = Field(
+                description="Datos para la suscripción del FCI",
+                example={
+                    "simbolo": "PIONERO_RENTA",
+                    "monto": 1000,
+                    "soloValidar": False
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Suscribe un FCI
             
             Args:
-                simbolo: Símbolo del FCI
-                monto: Monto a suscribir
+                request: Datos para la suscripción del FCI
             """
             try:
                 result = await self.client.suscribir_fci(
-                    simbolo=simbolo,
-                    monto=monto
+                    simbolo=request.simbolo,
+                    monto=request.monto,
+                    solo_validar=request.soloValidar
                 )
                 return {
                     "success": True,
@@ -383,24 +271,284 @@ class OperarRoutes(BaseRoutes):
             tags=["operar", "fci"]
         )
         async def rescatar_fci(
-            simbolo: str = Field(description="Símbolo del FCI"),
-            cantidad: float = Field(description="Cantidad a rescatar")
+            request: RescateFCIBindingModel = Field(
+                description="Datos para el rescate del FCI",
+                example={
+                    "simbolo": "PIONERO_RENTA",
+                    "cantidad": 10,
+                    "soloValidar": False
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Rescata un FCI
             
             Args:
-                simbolo: Símbolo del FCI
-                cantidad: Cantidad a rescatar
+                request: Datos para el rescate del FCI
             """
             try:
                 result = await self.client.rescatar_fci(
-                    simbolo=simbolo,
-                    cantidad=cantidad
+                    simbolo=request.simbolo,
+                    cantidad=request.cantidad,
+                    solo_validar=request.soloValidar
                 )
                 return {
                     "success": True,
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error rescatando FCI: {str(e)}"} 
+                return {"error": f"Error rescatando FCI: {str(e)}"}
+                
+        @mcp.tool(
+            name="cpd_puede_operar",
+            description="Verificar si el usuario puede operar con cheques de pago diferido",
+            tags=["operar", "cpd"]
+        )
+        async def cpd_puede_operar() -> Dict[str, Any]:
+            """
+            Verifica si el usuario puede operar con cheques de pago diferido
+            
+            Returns:
+                Dict[str, Any]: Información sobre si puede operar con CPD
+            """
+            try:
+                result = await self.client.cpd_puede_operar()
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error verificando si puede operar con CPD: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_cpd",
+            description="Obtener cheques de pago diferido según estado y segmento",
+            tags=["operar", "cpd"]
+        )
+        async def obtener_cpd(
+            estado: str = Field(description="Estado de los cheques"),
+            segmento: str = Field(description="Segmento de los cheques")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene los cheques de pago diferido según estado y segmento
+            
+            Args:
+                estado: Estado de los cheques
+                segmento: Segmento de los cheques
+                
+            Returns:
+                Dict[str, Any]: Información de los cheques
+            """
+            try:
+                result = await self.client.obtener_cpd(estado=estado, segmento=segmento)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo CPD: {str(e)}"}
+                
+        @mcp.tool(
+            name="calcular_comisiones_cpd",
+            description="Calcular comisiones para un cheque de pago diferido",
+            tags=["operar", "cpd", "comisiones"]
+        )
+        async def calcular_comisiones_cpd(
+            importe: float = Field(description="Importe del cheque"),
+            plazo: int = Field(description="Plazo en días"),
+            tasa: float = Field(description="Tasa de descuento")
+        ) -> Dict[str, Any]:
+            """
+            Calcula las comisiones para un cheque de pago diferido
+            
+            Args:
+                importe: Importe del cheque
+                plazo: Plazo en días
+                tasa: Tasa de descuento
+                
+            Returns:
+                Dict[str, Any]: Información de las comisiones
+            """
+            try:
+                result = await self.client.calcular_comisiones_cpd(
+                    importe=importe,
+                    plazo=plazo,
+                    tasa=tasa
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error calculando comisiones CPD: {str(e)}"}
+                
+        @mcp.tool(
+            name="operar_cpd",
+            description="Realizar una operación con un cheque de pago diferido",
+            tags=["operar", "cpd"]
+        )
+        async def operar_cpd(
+            request: CPDBindingModel = Field(
+                description="Datos para la operación con CPD",
+                example={
+                    "idSubasta": 12345,
+                    "tasa": 35.5,
+                    "fuente": "compra_Venta_Por_Web"
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Realiza una operación con un cheque de pago diferido
+            
+            Args:
+                request: Datos para la operación con CPD
+                
+            Returns:
+                Dict[str, Any]: Resultado de la operación
+            """
+            try:
+                result = await self.client.operar_cpd(
+                    id_subasta=request.idSubasta,
+                    tasa=request.tasa,
+                    fuente=request.fuente
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error operando CPD: {str(e)}"}
+                
+        @mcp.tool(
+            name="generar_token",
+            description="Generar un token para operaciones",
+            tags=["operar", "token"]
+        )
+        async def generar_token(
+            request: RequestTokenDDJJDTO = Field(
+                description="Datos para la generación del token",
+                example={
+                    "mercado": "bCBA",
+                    "simbolo": "GGAL",
+                    "cantidad": 10,
+                    "monto": 1000
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Genera un token para operaciones
+            
+            Args:
+                request: Datos para la generación del token
+                
+            Returns:
+                Dict[str, Any]: Token generado
+            """
+            try:
+                result = await self.client.generar_token(
+                    mercado=request.mercado,
+                    simbolo=request.simbolo,
+                    cantidad=request.cantidad,
+                    monto=request.monto
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error generando token: {str(e)}"}
+                
+        @mcp.tool(
+            name="vender_especie_d",
+            description="Crear una orden de venta de especie D",
+            tags=["operar", "venta", "especie_d"]
+        )
+        async def vender_especie_d(
+            request: VenderDBindingModel = Field(
+                description="Datos para la orden de venta de especie D",
+                example={
+                    "mercado": "bCBA",
+                    "simbolo": "GGAL",
+                    "cantidad": 10,
+                    "precio": 100.5,
+                    "validez": "2023-12-31T23:59:59",
+                    "idCuentaBancaria": 12345,
+                    "tipoOrden": "precioLimite",
+                    "plazo": "t2"
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Crea una orden de venta de especie D
+            
+            Args:
+                request: Datos para la orden de venta de especie D
+                
+            Returns:
+                Dict[str, Any]: Resultado de la operación
+            """
+            try:
+                result = await self.client.vender_especie_d(
+                    mercado=request.mercado,
+                    simbolo=request.simbolo,
+                    cantidad=request.cantidad,
+                    precio=request.precio,
+                    validez=request.validez,
+                    id_cuenta_bancaria=request.idCuentaBancaria,
+                    tipo_orden=request.tipoOrden,
+                    plazo=request.plazo,
+                    id_fuente=request.idFuente
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error creando orden de venta de especie D: {str(e)}"}
+                
+        @mcp.tool(
+            name="comprar_especie_d",
+            description="Crear una orden de compra de especie D",
+            tags=["operar", "compra", "especie_d"]
+        )
+        async def comprar_especie_d(
+            request: ComprarBindingModel = Field(
+                description="Datos para la orden de compra de especie D",
+                example={
+                    "mercado": "bCBA",
+                    "simbolo": "GGAL",
+                    "precio": 100.5,
+                    "plazo": "t2",
+                    "validez": "2023-12-31T23:59:59",
+                    "cantidad": 10,
+                    "tipoOrden": "precioLimite"
+                }
+            )
+        ) -> Dict[str, Any]:
+            """
+            Crea una orden de compra de especie D
+            
+            Args:
+                request: Datos para la orden de compra de especie D
+                
+            Returns:
+                Dict[str, Any]: Resultado de la operación
+            """
+            try:
+                result = await self.client.comprar_especie_d(
+                    mercado=request.mercado,
+                    simbolo=request.simbolo,
+                    precio=request.precio,
+                    plazo=request.plazo,
+                    validez=request.validez,
+                    cantidad=request.cantidad,
+                    tipo_orden=request.tipoOrden,
+                    monto=request.monto,
+                    id_fuente=request.idFuente
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error creando orden de compra de especie D: {str(e)}"} 

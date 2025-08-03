@@ -48,8 +48,8 @@ class MiCuentaRoutes(BaseRoutes):
             tags=["mi_cuenta", "movimientos"]
         )
         async def obtener_movimientos(
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
         ) -> Dict[str, Any]:
             """
             Obtiene los movimientos de la cuenta
@@ -76,8 +76,8 @@ class MiCuentaRoutes(BaseRoutes):
             tags=["mi_cuenta", "movimientos", "fondos"]
         )
         async def obtener_movimientos_fondos(
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
         ) -> Dict[str, Any]:
             """
             Obtiene los movimientos de fondos
@@ -104,8 +104,8 @@ class MiCuentaRoutes(BaseRoutes):
             tags=["mi_cuenta", "movimientos", "fci"]
         )
         async def obtener_movimientos_fci(
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
         ) -> Dict[str, Any]:
             """
             Obtiene los movimientos de FCI

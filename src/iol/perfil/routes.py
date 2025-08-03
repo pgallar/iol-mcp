@@ -61,7 +61,13 @@ class PerfilRoutes(BaseRoutes):
             tags=["perfil", "test_inversor"]
         )
         async def guardar_test_inversor(
-            respuestas: List[RespuestaTestInversor]
+            respuestas: List[RespuestaTestInversor] = Field(
+                description="Lista de respuestas del test",
+                example=[
+                    {"pregunta_id": 1, "respuesta_id": 2},
+                    {"pregunta_id": 2, "respuesta_id": 1}
+                ]
+            )
         ) -> Dict[str, Any]:
             """
             Guarda las respuestas del test de inversor
@@ -71,8 +77,8 @@ class PerfilRoutes(BaseRoutes):
             """
             try:
                 # Convertir las respuestas al formato esperado por la API
-                respuestas_api = [resp.dict() for resp in respuestas]
-                result = await self.client.guardar_test_inversor(respuestas_api)
+                respuestas_api = [resp.model_dump() for resp in respuestas]
+                result = await self.client.guardar_test_inversor(respuestas=respuestas_api)
                 return {
                     "success": True,
                     "result": result
@@ -94,4 +100,4 @@ class PerfilRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo preguntas del test: {str(e)}"} 
+                return {"error": f"Error obteniendo preguntas: {str(e)}"} 

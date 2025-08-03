@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
 from fastmcp import FastMCP
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
 from .client import AsesoresClient
 
@@ -32,7 +32,7 @@ class AsesoresRoutes(BaseRoutes):
             tags=["asesores", "consulta"]
         )
         async def obtener_asesor(
-            id_asesor: int
+            id_asesor: int = Field(description="ID del asesor")
         ) -> Dict[str, Any]:
             """Obtiene la información de un asesor específico"""
             try:
@@ -66,7 +66,7 @@ class AsesoresRoutes(BaseRoutes):
             tags=["asesores", "clientes"]
         )
         async def obtener_cliente_asesor(
-            id_cliente: int
+            id_cliente: int = Field(description="ID del cliente")
         ) -> Dict[str, Any]:
             """Obtiene la información de un cliente específico del asesor"""
             try:
@@ -84,9 +84,9 @@ class AsesoresRoutes(BaseRoutes):
             tags=["asesores", "operaciones"]
         )
         async def obtener_operaciones_cliente(
-            id_cliente: int,
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None
+            id_cliente: int = Field(description="ID del cliente"),
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
         ) -> Dict[str, Any]:
             """
             Obtiene las operaciones de un cliente específico

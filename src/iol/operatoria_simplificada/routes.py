@@ -44,13 +44,18 @@ class OperatoriaSimplificadaRoutes(BaseRoutes):
             tags=["operatoria_simplificada", "actualizar"]
         )
         async def actualizar_operatoria_simplificada(
-            config: OperatoriaSimplificadaConfig
+            config: OperatoriaSimplificadaConfig = Field(
+                description="Configuración de operatoria simplificada",
+                example={
+                    "operatoria_simplificada": True
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Actualiza la configuración de operatoria simplificada
             
             Args:
-                config: Nueva configuración
+                config: Configuración de operatoria simplificada
             """
             try:
                 result = await self.client.actualizar_operatoria_simplificada(

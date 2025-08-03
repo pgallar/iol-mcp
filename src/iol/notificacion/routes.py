@@ -16,8 +16,8 @@ class NotificacionRoutes(BaseRoutes):
             tags=["notificacion", "consulta"]
         )
         async def obtener_notificaciones(
-            fecha_desde: Optional[str] = None,
-            fecha_hasta: Optional[str] = None
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)")
         ) -> Dict[str, Any]:
             """
             Obtiene las notificaciones del usuario
@@ -44,7 +44,7 @@ class NotificacionRoutes(BaseRoutes):
             tags=["notificacion", "actualizar"]
         )
         async def marcar_notificacion_leida(
-            id_notificacion: int
+            id_notificacion: int = Field(description="ID de la notificación")
         ) -> Dict[str, Any]:
             """
             Marca una notificación como leída

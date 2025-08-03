@@ -16,9 +16,9 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "cotizacion"]
         )
         async def obtener_cotizacion(
-            simbolo: str,
-            mercado: str,
-            plazo: Optional[str] = None
+            simbolo: str = Field(description="Símbolo del título"),
+            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
+            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización (t0, t1, t2)")
         ) -> Dict[str, Any]:
             """
             Obtiene la cotización de un título
@@ -47,9 +47,9 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "panel"]
         )
         async def obtener_panel(
-            instrumento: str,
-            panel: str,
-            pais: str
+            instrumento: str = Field(description="Tipo de instrumento (Acciones, Bonos, etc)"),
+            panel: str = Field(description="Tipo de panel (Líderes, General, etc)"),
+            pais: str = Field(description="País del panel (argentina, estados_unidos, etc)")
         ) -> Dict[str, Any]:
             """
             Obtiene el panel de un instrumento
@@ -78,8 +78,8 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "opciones"]
         )
         async def obtener_opciones(
-            simbolo: str,
-            mercado: str
+            simbolo: str = Field(description="Símbolo del título"),
+            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)")
         ) -> Dict[str, Any]:
             """
             Obtiene las opciones de un título
@@ -106,9 +106,9 @@ class TitulosRoutes(BaseRoutes):
             tags=["titulos", "puntas"]
         )
         async def obtener_puntas(
-            simbolo: str,
-            mercado: str,
-            plazo: Optional[str] = None
+            simbolo: str = Field(description="Símbolo del título"),
+            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
+            plazo: Optional[str] = Field(default=None, description="Plazo de la cotización (t0, t1, t2)")
         ) -> Dict[str, Any]:
             """
             Obtiene las puntas de un título

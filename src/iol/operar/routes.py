@@ -89,7 +89,17 @@ class OperarRoutes(BaseRoutes):
             tags=["operar", "compra"]
         )
         async def comprar(
-            orden: OrdenOperacion
+            orden: OrdenOperacion = Field(
+                description="Datos de la orden de compra",
+                example={
+                    "simbolo": "GGAL",
+                    "cantidad": 100,
+                    "precio": 250.50,
+                    "validez": "dia",
+                    "mercado": "bcba",
+                    "plazo": "t2"
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Realiza una operación de compra
@@ -119,7 +129,17 @@ class OperarRoutes(BaseRoutes):
             tags=["operar", "venta"]
         )
         async def vender(
-            orden: OrdenOperacion
+            orden: OrdenOperacion = Field(
+                description="Datos de la orden de venta",
+                example={
+                    "simbolo": "GGAL",
+                    "cantidad": 100,
+                    "precio": 250.50,
+                    "validez": "dia",
+                    "mercado": "bcba",
+                    "plazo": "t2"
+                }
+            )
         ) -> Dict[str, Any]:
             """
             Realiza una operación de venta

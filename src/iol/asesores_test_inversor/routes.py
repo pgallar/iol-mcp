@@ -69,7 +69,13 @@ class AsesoresTestInversorRoutes(BaseRoutes):
         )
         async def guardar_test_inversor(
             id_cliente: int,
-            respuestas: List[RespuestaTestInversor]
+            respuestas: List[RespuestaTestInversor] = Field(
+                description="Lista de respuestas del test",
+                example=[
+                    {"pregunta_id": 1, "respuesta_id": 2},
+                    {"pregunta_id": 2, "respuesta_id": 1}
+                ]
+            )
         ) -> Dict[str, Any]:
             """
             Guarda las respuestas del test de inversor de un cliente
@@ -80,7 +86,7 @@ class AsesoresTestInversorRoutes(BaseRoutes):
             """
             try:
                 # Convertir las respuestas al formato esperado por la API
-                respuestas_api = [resp.dict() for resp in respuestas]
+                respuestas_api = [resp.model_dump() for resp in respuestas]
                 result = await self.client.guardar_test_inversor(
                     id_cliente=id_cliente,
                     respuestas=respuestas_api

@@ -11,9 +11,9 @@ class PortafolioRoutes(BaseRoutes):
 
     def register_tools(self, mcp: FastMCP):
         @mcp.tool(
-            name="portafolio_obtener_portafolio",  # Prefijo para evitar duplicados
-            description="Obtener portafolio",
-            tags=["portafolio", "consulta"]
+            name="obtener_portafolio",
+            description="Obtener portafolio del usuario",
+            tags=["portafolio"]
         )
         async def obtener_portafolio(
             pais: Optional[str] = Field(default=None, description="País del portafolio (argentina, estados_unidos, etc)")
@@ -35,36 +35,30 @@ class PortafolioRoutes(BaseRoutes):
 
         @mcp.tool(
             name="obtener_operaciones",
-            description="Obtener operaciones",
+            description="Obtener operaciones del usuario",
             tags=["portafolio", "operaciones"]
         )
         async def obtener_operaciones(
-            filtro: Optional[str] = Field(default=None, description="Tipo de operación (Compra, Venta, etc)"),
-            pais: Optional[str] = Field(default=None, description="País de la operación"),
-            estado: Optional[str] = Field(default=None, description="Estado de la operación (pendiente, terminada, etc)"),
-            fecha_desde: Optional[str] = Field(default=None, description="Fecha desde (YYYY-MM-DD)"),
-            fecha_hasta: Optional[str] = Field(default=None, description="Fecha hasta (YYYY-MM-DD)"),
-            numero: Optional[str] = Field(default=None, description="Número de operación")
+            pais: Optional[str] = Field(default=None, description="País de las operaciones (argentina, estados_unidos, etc)"),
+            estado: Optional[str] = Field(default=None, description="Estado de las operaciones (todas, pendientes, terminadas, canceladas)"),
+            fecha_desde: Optional[str] = Field(default=None, description="Fecha de inicio en formato YYYY-MM-DD"),
+            fecha_hasta: Optional[str] = Field(default=None, description="Fecha de fin en formato YYYY-MM-DD")
         ) -> Dict[str, Any]:
             """
             Obtiene las operaciones del usuario
             
             Args:
-                filtro: Tipo de operación (Compra, Venta, etc)
-                pais: País de la operación
-                estado: Estado de la operación (pendiente, terminada, etc)
-                fecha_desde: Fecha desde (YYYY-MM-DD)
-                fecha_hasta: Fecha hasta (YYYY-MM-DD)
-                numero: Número de operación
+                pais: País de las operaciones (argentina, estados_unidos, etc)
+                estado: Estado de las operaciones (todas, pendientes, terminadas, canceladas)
+                fecha_desde: Fecha de inicio en formato YYYY-MM-DD
+                fecha_hasta: Fecha de fin en formato YYYY-MM-DD
             """
             try:
                 result = await self.client.obtener_operaciones(
-                    filtro=filtro,
                     pais=pais,
                     estado=estado,
                     fecha_desde=fecha_desde,
-                    fecha_hasta=fecha_hasta,
-                    numero=numero
+                    fecha_hasta=fecha_hasta
                 )
                 return {
                     "success": True,
@@ -72,5 +66,72 @@ class PortafolioRoutes(BaseRoutes):
                 }
             except Exception as e:
                 return {"error": f"Error obteniendo operaciones: {str(e)}"}
-
-        # No es necesario llamar a mcp.add_tool ya que el decorador @mcp.tool lo hace automáticamente 
+                
+        @mcp.tool(
+            name="obtener_portafolio_valorizado",
+            description="Obtener portafolio valorizado del usuario",
+            tags=["portafolio", "valorizado"]
+        )
+        async def obtener_portafolio_valorizado(
+            pais: Optional[str] = Field(default=None, description="País del portafolio (argentina, estados_unidos, etc)")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene el portafolio valorizado del usuario
+            
+            Args:
+                pais: País del portafolio (argentina, estados_unidos, etc)
+            """
+            try:
+                result = await self.client.obtener_portafolio_valorizado(pais=pais)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo portafolio valorizado: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_rendimiento_historico",
+            description="Obtener rendimiento histórico del portafolio",
+            tags=["portafolio", "rendimiento"]
+        )
+        async def obtener_rendimiento_historico(
+            pais: Optional[str] = Field(default=None, description="País del portafolio (argentina, estados_unidos, etc)")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene el rendimiento histórico del portafolio
+            
+            Args:
+                pais: País del portafolio (argentina, estados_unidos, etc)
+            """
+            try:
+                result = await self.client.obtener_rendimiento_historico(pais=pais)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo rendimiento histórico: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_composicion_portafolio",
+            description="Obtener composición del portafolio por tipo de instrumento",
+            tags=["portafolio", "composicion"]
+        )
+        async def obtener_composicion_portafolio(
+            pais: Optional[str] = Field(default=None, description="País del portafolio (argentina, estados_unidos, etc)")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene la composición del portafolio por tipo de instrumento
+            
+            Args:
+                pais: País del portafolio (argentina, estados_unidos, etc)
+            """
+            try:
+                result = await self.client.obtener_composicion_portafolio(pais=pais)
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo composición del portafolio: {str(e)}"} 

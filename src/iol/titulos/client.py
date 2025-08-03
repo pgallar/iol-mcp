@@ -67,4 +67,62 @@ class TitulosClient(IOLAPIClient):
         endpoint = f"/api/v2/{mercado}/Titulos/{simbolo}/Puntas"
         if plazo:
             endpoint += f"/{plazo}"
-        return await self.get(endpoint) 
+        return await self.get(endpoint)
+        
+    async def obtener_datos_historicos(
+        self,
+        simbolo: str,
+        mercado: str,
+        desde: str,
+        hasta: str,
+        ajustado: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los datos históricos de un título
+        
+        Args:
+            simbolo: Símbolo del título
+            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+            desde: Fecha de inicio en formato YYYY-MM-DD
+            hasta: Fecha de fin en formato YYYY-MM-DD
+            ajustado: Indica si los datos deben estar ajustados por dividendos
+        """
+        endpoint = f"/api/v2/{mercado}/Titulos/{simbolo}/Cotizacion/Historico"
+        params = {
+            "fechaDesde": desde,
+            "fechaHasta": hasta,
+            "ajustado": str(ajustado).lower()
+        }
+        return await self.get(endpoint, params=params)
+        
+    async def buscar_titulos(
+        self,
+        filtro: str,
+        mercado: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Busca títulos por nombre o símbolo
+        
+        Args:
+            filtro: Texto a buscar
+            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+        """
+        endpoint = f"/api/v2/Titulos/Buscar"
+        params = {"filtro": filtro}
+        if mercado:
+            params["mercado"] = mercado
+        return await self.get(endpoint, params=params)
+        
+    async def obtener_detalle_titulo(
+        self,
+        simbolo: str,
+        mercado: str
+    ) -> Dict[str, Any]:
+        """
+        Obtiene información detallada de un título
+        
+        Args:
+            simbolo: Símbolo del título
+            mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+        """
+        return await self.get(f"/api/v2/{mercado}/Titulos/{simbolo}/Detalle") 

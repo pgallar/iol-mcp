@@ -126,4 +126,97 @@ class TitulosRoutes(BaseRoutes):
                     "result": result
                 }
             except Exception as e:
-                return {"error": f"Error obteniendo puntas: {str(e)}"} 
+                return {"error": f"Error obteniendo puntas: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_datos_historicos",
+            description="Obtener datos históricos de un título",
+            tags=["titulos", "historico"]
+        )
+        async def obtener_datos_historicos(
+            simbolo: str = Field(description="Símbolo del título"),
+            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)"),
+            desde: str = Field(description="Fecha de inicio en formato YYYY-MM-DD"),
+            hasta: str = Field(description="Fecha de fin en formato YYYY-MM-DD"),
+            ajustado: bool = Field(default=True, description="Indica si los datos deben estar ajustados por dividendos")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene los datos históricos de un título
+            
+            Args:
+                simbolo: Símbolo del título
+                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+                desde: Fecha de inicio en formato YYYY-MM-DD
+                hasta: Fecha de fin en formato YYYY-MM-DD
+                ajustado: Indica si los datos deben estar ajustados por dividendos
+            """
+            try:
+                result = await self.client.obtener_datos_historicos(
+                    simbolo=simbolo,
+                    mercado=mercado,
+                    desde=desde,
+                    hasta=hasta,
+                    ajustado=ajustado
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo datos históricos: {str(e)}"}
+                
+        @mcp.tool(
+            name="buscar_titulos",
+            description="Buscar títulos por nombre o símbolo",
+            tags=["titulos", "busqueda"]
+        )
+        async def buscar_titulos(
+            filtro: str = Field(description="Texto a buscar"),
+            mercado: Optional[str] = Field(default=None, description="Mercado del título (bcba, nyse, nasdaq, etc)")
+        ) -> Dict[str, Any]:
+            """
+            Busca títulos por nombre o símbolo
+            
+            Args:
+                filtro: Texto a buscar
+                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+            """
+            try:
+                result = await self.client.buscar_titulos(
+                    filtro=filtro,
+                    mercado=mercado
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error buscando títulos: {str(e)}"}
+                
+        @mcp.tool(
+            name="obtener_detalle_titulo",
+            description="Obtener información detallada de un título",
+            tags=["titulos", "detalle"]
+        )
+        async def obtener_detalle_titulo(
+            simbolo: str = Field(description="Símbolo del título"),
+            mercado: str = Field(description="Mercado del título (bcba, nyse, nasdaq, etc)")
+        ) -> Dict[str, Any]:
+            """
+            Obtiene información detallada de un título
+            
+            Args:
+                simbolo: Símbolo del título
+                mercado: Mercado del título (bcba, nyse, nasdaq, etc)
+            """
+            try:
+                result = await self.client.obtener_detalle_titulo(
+                    simbolo=simbolo,
+                    mercado=mercado
+                )
+                return {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as e:
+                return {"error": f"Error obteniendo detalle del título: {str(e)}"} 

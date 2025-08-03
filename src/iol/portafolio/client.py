@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from ..http_client import IOLAPIClient
 
 class PortafolioClient(IOLAPIClient):
@@ -10,39 +10,86 @@ class PortafolioClient(IOLAPIClient):
         Obtiene el portafolio del usuario
         
         Args:
-            pais: Filtrar por país (argentina, estados_unidos, etc)
+            pais: País del portafolio (argentina, estados_unidos, etc)
         """
-        params = {"pais": pais} if pais else None
-        return await self.get("/api/v2/Portafolio", params=params)
+        endpoint = "/api/v2/Portafolio"
+        params = {}
+        if pais:
+            params["pais"] = pais
+        return await self.get(endpoint, params=params)
 
     async def obtener_operaciones(
         self,
-        filtro: Optional[str] = None,
         pais: Optional[str] = None,
         estado: Optional[str] = None,
         fecha_desde: Optional[str] = None,
-        fecha_hasta: Optional[str] = None,
-        numero: Optional[str] = None
+        fecha_hasta: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Obtiene las operaciones del usuario
         
         Args:
-            filtro: Tipo de operación (Compra, Venta, etc)
-            pais: País de la operación
-            estado: Estado de la operación (pendiente, terminada, etc)
-            fecha_desde: Fecha desde (YYYY-MM-DD)
-            fecha_hasta: Fecha hasta (YYYY-MM-DD)
-            numero: Número de operación
+            pais: País de las operaciones (argentina, estados_unidos, etc)
+            estado: Estado de las operaciones (todas, pendientes, terminadas, canceladas)
+            fecha_desde: Fecha de inicio en formato YYYY-MM-DD
+            fecha_hasta: Fecha de fin en formato YYYY-MM-DD
         """
-        params = {
-            "filtro": filtro,
-            "pais": pais,
-            "estado": estado,
-            "fechaDesde": fecha_desde,
-            "fechaHasta": fecha_hasta,
-            "numero": numero
-        }
-        # Eliminar parámetros None
-        params = {k: v for k, v in params.items() if v is not None}
-        return await self.get("/api/v2/Operaciones", params=params) 
+        endpoint = "/api/v2/Operaciones"
+        params = {}
+        if pais:
+            params["pais"] = pais
+        if estado:
+            params["estado"] = estado
+        if fecha_desde:
+            params["fechaDesde"] = fecha_desde
+        if fecha_hasta:
+            params["fechaHasta"] = fecha_hasta
+        return await self.get(endpoint, params=params)
+        
+    async def obtener_portafolio_valorizado(
+        self,
+        pais: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Obtiene el portafolio valorizado del usuario
+        
+        Args:
+            pais: País del portafolio (argentina, estados_unidos, etc)
+        """
+        endpoint = "/api/v2/Portafolio/Valorizado"
+        params = {}
+        if pais:
+            params["pais"] = pais
+        return await self.get(endpoint, params=params)
+        
+    async def obtener_rendimiento_historico(
+        self,
+        pais: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Obtiene el rendimiento histórico del portafolio
+        
+        Args:
+            pais: País del portafolio (argentina, estados_unidos, etc)
+        """
+        endpoint = "/api/v2/Portafolio/Rendimiento"
+        params = {}
+        if pais:
+            params["pais"] = pais
+        return await self.get(endpoint, params=params)
+        
+    async def obtener_composicion_portafolio(
+        self,
+        pais: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Obtiene la composición del portafolio por tipo de instrumento
+        
+        Args:
+            pais: País del portafolio (argentina, estados_unidos, etc)
+        """
+        endpoint = "/api/v2/Portafolio/Composicion"
+        params = {}
+        if pais:
+            params["pais"] = pais
+        return await self.get(endpoint, params=params) 

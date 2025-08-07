@@ -1,4 +1,5 @@
 from typing import Dict, Any, Optional, List
+from datetime import datetime, timedelta
 from ..http_client import IOLAPIClient
 
 class OperarClient(IOLAPIClient):
@@ -8,7 +9,7 @@ class OperarClient(IOLAPIClient):
         simbolo: str,
         precio: float,
         plazo: str,
-        validez: str,
+        validez: Optional[str] = None,
         cantidad: Optional[float] = None,
         tipo_orden: Optional[str] = None,
         monto: Optional[float] = None,
@@ -22,12 +23,20 @@ class OperarClient(IOLAPIClient):
             simbolo: Símbolo del título
             precio: Precio de compra
             plazo: Plazo de la operación (t0, t1, t2, t3)
-            validez: Fecha de validez de la orden en formato ISO
+            validez: Fecha de validez de la orden en formato ISO (por defecto: 3 meses)
             cantidad: Cantidad a comprar (opcional)
             tipo_orden: Tipo de orden (precioLimite, precioMercado) (opcional)
             monto: Monto efectivo a invertir (opcional)
             id_fuente: ID de la fuente (opcional)
         """
+        # Si no se proporciona validez, usar fecha a 3 meses
+        if validez is None:
+            validez = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59")
+            
+        # Si no se proporciona validez, usar fecha a 3 meses
+        if validez is None:
+            validez = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59")
+            
         data = {
             "mercado": mercado,
             "simbolo": simbolo,
@@ -289,7 +298,7 @@ class OperarClient(IOLAPIClient):
         simbolo: str,
         precio: float,
         plazo: str,
-        validez: str,
+        validez: Optional[str] = None,
         cantidad: Optional[float] = None,
         tipo_orden: Optional[str] = None,
         monto: Optional[float] = None,
@@ -312,6 +321,10 @@ class OperarClient(IOLAPIClient):
         Returns:
             Dict[str, Any]: Objeto ResponseModel con el resultado de la operación
         """
+        # Si no se proporciona validez, usar fecha a 3 meses
+        if validez is None:
+            validez = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59")
+            
         data = {
             "mercado": mercado,
             "simbolo": simbolo,

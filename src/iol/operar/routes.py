@@ -1,4 +1,5 @@
 from typing import Dict, Any, Optional, List, Union
+from datetime import datetime, timedelta
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..base_routes import BaseRoutes
@@ -9,6 +10,9 @@ class ComprarDetalleModel(BaseModel):
     simbolo: str = Field(description="Símbolo del título")
     cantidad: float = Field(description="Cantidad a comprar")
     mercado: str = Field(description="Mercado del título", enum=["bCBA", "nYSE", "nASDAQ", "aMEX", "bCS", "rOFX"])
+    tipoPrecio: Optional[str] = Field(default=None, description="Tipo de precio (L para límite)")
+    precio: Optional[float] = Field(default=None, description="Precio de compra")
+    plazo: Optional[str] = Field(default=None, description="Plazo de la operación", enum=["t0", "t1", "t2", "t3"])
 
     model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
@@ -39,7 +43,7 @@ class ComprarBindingModel(BaseModel):
     simbolo: str = Field(description="Símbolo del título")
     precio: float = Field(description="Precio de compra")
     plazo: str = Field(description="Plazo de la operación", enum=["t0", "t1", "t2", "t3"])
-    validez: str = Field(description="Fecha de validez de la orden en formato ISO")
+    validez: Optional[str] = Field(default=None, description="Fecha de validez de la orden en formato ISO (por defecto: 3 meses)")
     cantidad: Optional[float] = Field(default=None, description="Cantidad a comprar")
     tipoOrden: Optional[str] = Field(default=None, description="Tipo de orden", enum=["precioLimite", "precioMercado"])
     monto: Optional[float] = Field(default=None, description="Monto efectivo a invertir")
@@ -222,15 +226,21 @@ class OperarRoutes(BaseRoutes):
                     # Procesar compra múltiple
                     resultados = []
                     for detalle in request.detalle:
-                        # Aquí deberíamos tener una implementación para compras múltiples
-                        # Por ahora, usamos el método existente con valores por defecto para los campos faltantes
+                        # Usamos los valores proporcionados en el detalle o valores por defecto
+                        from datetime import datetime, timedelta
+                        
+                        precio = detalle.precio if hasattr(detalle, "precio") and detalle.precio is not None else 0
+                        plazo = detalle.plazo if hasattr(detalle, "plazo") and detalle.plazo is not None else "t2"
+                        # Fecha de validez por defecto: 3 meses a partir de la fecha actual
+                        validez = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59")
+                        
                         resultado = await self.client.comprar(
                             mercado=detalle.mercado,
                             simbolo=detalle.simbolo,
                             cantidad=detalle.cantidad,
-                            precio=0,  # Valor por defecto
-                            plazo="t2",  # Valor por defecto
-                            validez="2023-12-31T23:59:59"  # Valor por defecto
+                            precio=precio,
+                            plazo=plazo,
+                            validez=validez
                         )
                         resultados.append(resultado)
                     return {
@@ -239,12 +249,17 @@ class OperarRoutes(BaseRoutes):
                     }
                 else:
                     # Procesar compra individual
+                    # Si no se proporciona validez, usar fecha a 3 meses
+                    validez = request.validez
+                    if validez is None:
+                        validez = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59")
+                    
                     result = await self.client.comprar(
                         mercado=request.mercado,
                         simbolo=request.simbolo,
                         precio=request.precio,
                         plazo=request.plazo,
-                        validez=request.validez,
+                        validez=validez,
                         cantidad=request.cantidad,
                         tipo_orden=request.tipoOrden,
                         monto=request.monto,

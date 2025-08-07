@@ -223,30 +223,7 @@ class TitulosRoutes(BaseRoutes):
 
 
 
-        @mcp.tool(
-            name="obtener_tipos_fondos_por_administradora",
-            description="Obtener tipos de fondos por administradora",
-            tags=["titulos", "fci"]
-        )
-        async def obtener_tipos_fondos_por_administradora(
-            administradora: str = Field(description="Nombre de la administradora", enum=["cONVEXITY", "sUPERVIELLE"])
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los tipos de fondos por administradora
-            
-            Args:
-                administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
-            """
-            try:
-                result = await self.client.obtener_tipos_fondos_por_administradora(
-                    administradora=administradora
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo tipos de fondos por administradora: {str(e)}"}
+
 
 
                 

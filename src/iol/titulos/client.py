@@ -94,17 +94,7 @@ class TitulosClient(IOLAPIClient):
         
 
         
-    async def obtener_tipos_fondos_por_administradora(
-        self,
-        administradora: str
-    ) -> Dict[str, Any]:
-        """
-        Obtiene los tipos de fondos por administradora
-        
-        Args:
-            administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
-        """
-        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos")
+
         
 
         

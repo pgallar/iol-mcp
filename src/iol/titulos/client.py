@@ -92,11 +92,7 @@ class TitulosClient(IOLAPIClient):
         """
         return await self.get("/api/v2/Titulos/FCI/TipoFondos")
         
-    async def obtener_administradoras(self) -> Dict[str, Any]:
-        """
-        Obtiene las administradoras de fondos
-        """
-        return await self.get("/api/v2/Titulos/FCI/Administradoras")
+
         
     async def obtener_tipos_fondos_por_administradora(
         self,

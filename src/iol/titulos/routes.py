@@ -221,23 +221,7 @@ class TitulosRoutes(BaseRoutes):
             except Exception as e:
                 return {"error": f"Error obteniendo tipos de fondos: {str(e)}"}
 
-        @mcp.tool(
-            name="obtener_administradoras",
-            description="Obtener administradoras de fondos",
-            tags=["titulos", "fci"]
-        )
-        async def obtener_administradoras() -> Dict[str, Any]:
-            """
-            Obtiene las administradoras de fondos
-            """
-            try:
-                result = await self.client.obtener_administradoras()
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo administradoras: {str(e)}"}
+
 
         @mcp.tool(
             name="obtener_tipos_fondos_por_administradora",

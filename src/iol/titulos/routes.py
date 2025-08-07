@@ -248,36 +248,7 @@ class TitulosRoutes(BaseRoutes):
             except Exception as e:
                 return {"error": f"Error obteniendo tipos de fondos por administradora: {str(e)}"}
 
-        @mcp.tool(
-            name="obtener_fondos_por_administradora_y_tipo",
-            description="Obtener fondos por administradora y tipo",
-            tags=["titulos", "fci"]
-        )
-        async def obtener_fondos_por_administradora_y_tipo(
-            administradora: str = Field(description="Nombre de la administradora", enum=["cONVEXITY", "sUPERVIELLE"]),
-            tipo_fondo: str = Field(description="Tipo de fondo", enum=[
-                "plazo_fijo_pesos", "plazo_fijo_dolares", "renta_fija_pesos", "renta_fija_dolares",
-                "renta_mixta_pesos", "renta_mixta_dolares", "renta_variable_pesos", "renta_variable_dolares"
-            ])
-        ) -> Dict[str, Any]:
-            """
-            Obtiene los fondos por administradora y tipo
-            
-            Args:
-                administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
-                tipo_fondo: Tipo de fondo (plazo_fijo_pesos, plazo_fijo_dolares, etc.)
-            """
-            try:
-                result = await self.client.obtener_fondos_por_administradora_y_tipo(
-                    administradora=administradora,
-                    tipo_fondo=tipo_fondo
-                )
-                return {
-                    "success": True,
-                    "result": result
-                }
-            except Exception as e:
-                return {"error": f"Error obteniendo fondos por administradora y tipo: {str(e)}"}
+
                 
         @mcp.tool(
             name="obtener_cotizaciones_panel_todos",

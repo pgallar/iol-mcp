@@ -106,22 +106,7 @@ class TitulosClient(IOLAPIClient):
         """
         return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos")
         
-    async def obtener_fondos_por_administradora_y_tipo(
-        self,
-        administradora: str,
-        tipo_fondo: str
-    ) -> List[Dict[str, Any]]:
-        """
-        Obtiene los fondos por administradora y tipo
-        
-        Args:
-            administradora: Nombre de la administradora (cONVEXITY, sUPERVIELLE)
-            tipo_fondo: Tipo de fondo (plazo_fijo_pesos, plazo_fijo_dolares, renta_fija_pesos, etc.)
-            
-        Returns:
-            List[Dict[str, Any]]: Lista de objetos TituloFCIModel con la información de los fondos
-        """
-        return await self.get(f"/api/v2/Titulos/FCI/Administradoras/{administradora}/TipoFondos/{tipo_fondo}")
+
         
     async def obtener_cotizaciones_panel_todos(
         self,
